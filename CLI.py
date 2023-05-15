@@ -19,13 +19,13 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--n300", type=int, metavar="0-65535", help="Set amount of 300s")
     parser.add_argument("--n100", type=int, metavar="0-65535", help="Set amount of 100s")
     parser.add_argument("--n50", type=int, metavar="0-65535", help="Set amount of 50s")
-    parser.add_argument("--gekis", "--nmax300", type=int, metavar="0-65535", help="Set amount of gekis (different 300s)")
-    parser.add_argument("--katus", "--n200", type=int, metavar="0-65535", help="Set amount of katus (different 100s)")
-    parser.add_argument("--misses", type=int, metavar="0-65535", help="Set amount of misses")
+    parser.add_argument("--ngekis", type=int, metavar="0-65535", help="Set amount of gekis (different 300s)")
+    parser.add_argument("--nkatus", type=int, metavar="0-65535", help="Set amount of katus (different 100s)")
+    parser.add_argument("--nmisses", type=int, metavar="0-65535", help="Set amount of misses")
 
     parser.add_argument("--score", type=int, metavar="0-2147483647", help="Set replay total score")
     parser.add_argument("--maxcombo", type=int, metavar="0-65535", help="Set maximum combo")
-    parser.add_argument("--pfc", type=bool, metavar="True OR False", help="Display \"Perfect\" text in life graph")
+    parser.add_argument("--pfc", type=bool, metavar="True/False", help="Display \"Perfect\" text in life graph")
 
     parser.add_argument("--mods", type=str, metavar="mod,mod,...", help="Set mods for replay")
     parser.add_argument("--rawmods", type=int, metavar="code", help="Set mods for replay using raw value (check .osr file format wiki)")

@@ -1,4 +1,4 @@
-from osrparse import Replay
+from osrparse import Replay, Mod
 from os.path import isdir, join, isfile
 from os import mkdir
 import glob
@@ -27,6 +27,75 @@ Date: {date}
 Score id: {score_id}
 """
 
+MODS_2_CODES = {
+    "nm": 0,
+    "nf": 1 << 0,
+    "ez": 1 << 1,
+    "td": 1 << 2,
+    "hd": 1 << 3,
+    "hr": 1 << 4,
+    "sd": 1 << 5,
+    "dt": 1 << 6,
+    "rx": 1 << 7,
+    "ht": 1 << 8,
+    "nc": 1 << 9,
+    "fl": 1 << 10,
+    "at": 1 << 11,
+    "so": 1 << 12,
+    "ap": 1 << 13,
+    "pf": 1 << 14,
+    "4k": 1 << 15,
+    "5k": 1 << 16,
+    "6k": 1 << 17,
+    "7k": 1 << 18,
+    "8k": 1 << 19,
+    "fd": 1 << 20,
+    "rd": 1 << 21,
+    "cn": 1 << 22,
+    "tp": 1 << 23,
+    "9k": 1 << 24,
+    "co": 1 << 25,
+    "1k": 1 << 26,
+    "3k": 1 << 27,
+    "2k": 1 << 28,
+    "v2": 1 << 29,
+    "mr": 1 << 30,
+}
+
+CODES_2_MODS = {
+    1 << 0: "nm",
+    1 << 1: "nf",
+    1 << 2: "ez",
+    1 << 3: "td",
+    1 << 4: "hd",
+    1 << 5: "hr",
+    1 << 6: "sd",
+    1 << 7: "rx",
+    1 << 8: "ht",
+    1 << 9: "nc",
+    1 << 10: "fl",
+    1 << 11: "at",
+    1 << 12: "so",
+    1 << 13: "ap",
+    1 << 14: "pf",
+    1 << 15: "4k",
+    1 << 16: "5k",
+    1 << 17: "6k",
+    1 << 18: "7k",
+    1 << 19: "8k",
+    1 << 20: "fd",
+    1 << 21: "rd",
+    1 << 22: "cn",
+    1 << 23: "tp",
+    1 << 24: "9k",
+    1 << 25: "co",
+    1 << 26: "1k",
+    1 << 27: "3k",
+    1 << 28: "2k",
+    1 << 29: "v2",
+    1 << 30: "mr",
+}
+
 
 def ticks2date(ticks) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(ticks, tz=datetime.timezone.utc)
@@ -47,7 +116,7 @@ def show_replay_info(replay: Replay):
                               score=replay.score,
                               combo=replay.max_combo,
                               pfc=replay.perfect,
-                              mods=replay.mods,
+                              mods=", ".join([CODES_2_MODS.get(mod) for mod in replay.mods]),
                               date=replay.timestamp,
                               score_id=replay.replay_id))
 
@@ -93,23 +162,23 @@ if __name__ == "__main__":
         for replay in replays:
             replay.count_50 = args.n50
 
-    if args.gekis is not None:
+    if args.ngekis is not None:
         show_info = False
 
         for replay in replays:
-            replay.count_geki = args.gekis
+            replay.count_geki = args.ngekis
 
-    if args.katus is not None:
+    if args.nkatus is not None:
         show_info = False
 
         for replay in replays:
-            replay.count_katu = args.katus
+            replay.count_katu = args.nkatus
 
-    if args.misses is not None:
+    if args.nmisses is not None:
         show_info = False
 
         for replay in replays:
-            replay.count_miss = args.misses
+            replay.count_miss = args.nmisses
 
     if args.score is not None:
         show_info = False
@@ -133,13 +202,19 @@ if __name__ == "__main__":
         show_info = False
 
         for replay in replays:
-            replay.mods = args.mods  # TODO change to parser for code2mods and mods2code
+            mods = 0
+            for mod in args.mods.split(","):
+                mod_code = MODS_2_CODES.get(mod)
+                if mod_code is None:
+                    raise Exception(f"Mod {mod} don't exist")
+                mods += mod_code
+            replay.mods = Mod(mods)
 
     if args.rawmods is not None:
         show_info = False
 
         for replay in replays:
-            replay.mods = args.rawmods
+            replay.mods = Mod(args.rawmods)
 
     if args.time is not None:
         show_info = False
