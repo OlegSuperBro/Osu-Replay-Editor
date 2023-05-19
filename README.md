@@ -8,6 +8,10 @@ This thing let you edit .osr files (osu! replays)
 2. Install requirements by running ```pip install -r requirements```
 3. Run main file ```python main.py```
 
+There only 1 known issue:
+
+Replay that have skips, getting broken. It's problem in osrparse module and i'm trying to fix it!
+
 Also i recommend use virtual environment.
 
 I used [venv](https://docs.python.org/3/library/venv.html)
