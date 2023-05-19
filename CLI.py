@@ -1,8 +1,5 @@
 import argparse
-
-
-# what tf is this abomination
-MODS_LIST = ["nf", "ez", "hd", "hr", "sd", "dt", "rx", "ht", "nc", "fl", "at", "so", "ap", "pf", "1k", "2k", "3k", "4k", "5k", "6k", "7k", "8k", "9k", "fd", "rd", "cn", "co", "v2", "mr", "td"]
+import utils
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -12,6 +9,7 @@ def get_parser() -> argparse.ArgumentParser:
                                             For more detailed help check github page\n \
                                             DON'T USE THIS FOR CHEATING!!!",)
     parser.add_argument("path", type=str, help="Path to replay or folder with replays. If it's only argument provided, show info about replay")
+
     # parser.add_argument("--GUI", "--gui", action="store_true", required=False, help="Start with GUI. All other arguments will be ignored", )  # TODO uncomment this when ui is done
 
     parser.add_argument("--nickname", type=str, help="Set a nickname")
@@ -32,6 +30,7 @@ def get_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--time", type=int, metavar="86400-inf", help="Set replay date using windows ticks")
 
+    parser.add_argument("--info", action="store_true", help="Show info about replay/replays")
     parser.add_argument("-o", "--output", type=str, metavar="path", help="Set output file")
 
     return parser

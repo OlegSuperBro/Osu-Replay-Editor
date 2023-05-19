@@ -20,8 +20,9 @@ I used [venv](https://docs.python.org/3/library/venv.html)
 
 | Argument   | Usage                                    | Description                     |
 |------------|:----------------------------------------:|---------------------------------|
-| path       | ``` main.py [path] ```                   | If single file provided without any other arguments, show info about replay. If directory provided read all replays in that directory   |
+| path       | ``` main.py [path] ```                   | Path to replay/directory with replays|
 | -o         | ``` main.py -o [path] ```                | Can be either file name (for single file) or directory (for single and multiple files). If it's file name, write edited replay in \[path\]. If it's directory, write all replays in that directory with names from 0 to inf (0.osr, 1.osr, ...) |
+| --info     | ``` main.py --info ```                   | Show info about replay/replays (Show info AFTER changing)|
 | --nickname | ``` main.py --nickname [name] ```        | Change nickname in replay to provided |
 | --n300     | ``` main.py --n300 [0-65535] ```         | Change amount of 300s. Represented as unsigned short |
 | --n100     | ``` main.py --n100 [0-65535] ```         | Change amount of 100s. Represented as unsigned short |
