@@ -10,7 +10,7 @@ This thing let you edit .osr files (osu! replays)
 
 There only 1 known issue:
 
-Replay that have skips, getting broken. It's problem in osrparse module and i'm trying to fix it!
+Replay that have skips, getting broken. It's problem in osrparse module. You can check [this issue](https://github.com/kszlim/osu-replay-parser/issues/41) to get more info
 
 Also i recommend use virtual environment.
 

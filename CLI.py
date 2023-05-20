@@ -9,7 +9,6 @@ def get_parser() -> argparse.ArgumentParser:
                                             For more detailed help check github page\n \
                                             DON'T USE THIS FOR CHEATING!!!",)
     parser.add_argument("path", type=str, help="Path to replay or folder with replays. If it's only argument provided, show info about replay")
-
     # parser.add_argument("--GUI", "--gui", action="store_true", required=False, help="Start with GUI. All other arguments will be ignored", )  # TODO uncomment this when ui is done
 
     parser.add_argument("--nickname", type=str, help="Set a nickname")

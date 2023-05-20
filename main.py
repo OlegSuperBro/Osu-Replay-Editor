@@ -64,6 +64,8 @@ def main():
         tmp_replay.path = args.path
         replays.append(tmp_replay)
 
+    del tmp_replay
+
     # TODO uncomment this when GUI is done
     # if args.GUI:
     #     CUI_loop(replays)
@@ -131,7 +133,7 @@ def main():
             print("Replay: " + replay.path)
             show_replay_info(replay)
 
-    if args.output:
+    if args.output is not None:
         # if only 1 replay given
         if len(replays) == 1:
             replays[0].write_path(args.output)
@@ -143,7 +145,7 @@ def main():
                 mkdir(args.output)
 
             for index, replay in enumerate(replays):
-                replay.write_path(args.output + f"{index}.osr")
+                replay.write_path(join(args.output, f"{index}.osr"))
 
 
 if __name__ == "__main__":
