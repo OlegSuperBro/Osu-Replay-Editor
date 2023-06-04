@@ -1,5 +1,15 @@
 # Changelog
 
+## 2023.6.04.0
+
+### Added
+
+- Functions in **utils.py** to convert mods to code, code to mods, code to mode, mode to code
+
+### Changed
+
+- Moved source files to **scr** folder
+
 ## 2023.5.21.0
 
 ### Changed

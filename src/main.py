@@ -43,7 +43,7 @@ def show_replay_info(replay: Replay):
                               score=replay.score,
                               combo=replay.max_combo,
                               pfc=replay.perfect,
-                              mods=", ".join([utils.CODES_2_MODS.get(mod) for mod in replay.mods]),
+                              mods=", ".join([utils.code2mods(replay.mods)]),
                               date=replay.timestamp,
                               score_id=replay.replay_id))
 
@@ -112,13 +112,7 @@ def main():
 
     if args.mods is not None:
         for replay in replays:
-            mods = 0
-            for mod in args.mods.split(","):
-                mod_code = utils.MODS_2_CODES.get(mod)
-                if mod_code is None:
-                    raise Exception(f"Mod {mod} don't exist")
-                mods += mod_code
-            replay.mods = Mod(mods)
+            replay.mods = Mod(utils.mods2code(args.mods))
 
     if args.rawmods is not None:
         for replay in replays:

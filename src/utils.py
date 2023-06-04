@@ -69,6 +69,44 @@ CODES_2_MODS = {
     1 << 30: "mr",
 }
 
+CODE_2_MODE = {
+    0: "osu",
+    1: "taiko",
+    2: "catch",
+    3: "mania"
+}
+
+MODE_2_CODE = {
+    "osu": 0,
+    "taiko": 1,
+    "catch": 2,
+    "mania": 3,
+}
+
+
+def code2mode(code: int):
+    return CODE_2_MODE.get(code)
+
+
+def mode2code(mode: str):
+    return MODE_2_CODE.get(mode)
+
+
+def mods2code(mods: list[str]):
+    return sum([MODS_2_CODES.get(mod) for mod in mods])
+
+
+def code2mods(code: int):
+    mod_list = []
+    code = bin(code)[:1:-1]
+    for i in range(len(CODES_2_MODS.keys())):
+        try:
+            if code[i] == "1":
+                mod_list.append(CODES_2_MODS.get(1 << i))
+        except IndexError:
+            break
+    return mod_list
+
 
 def ticks2date(ticks) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(ticks, tz=datetime.timezone.utc)
