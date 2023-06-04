@@ -83,20 +83,45 @@ MODE_2_CODE = {
     "mania": 3,
 }
 
+VALUES_LIMITS = {
+    "-GAME_VER-": range(0, 2147483647),
+    "-N300-": range(0, 65535),
+    "-N100-": range(0, 65535),
+    "-N50-": range(0, 65535),
+    "-NGEKIS-": range(0, 65535),
+    "-NKATUS-": range(0, 65535),
+    "-NMISSES-": range(0, 65535),
+    "-TOTAL_SCORE-": range(0, 2147483647),
+    "-MAX_COMBO-": range(0, 65535),
+}
 
-def code2mode(code: int):
+
+def check_limit(name: str, value: any) -> tuple[bool, int]:
+    limit = VALUES_LIMITS.get(name)
+    if limit is None:
+        return (True, VALUES_LIMITS.get(name))
+
+    if not (is_int(value)):
+        return (False, VALUES_LIMITS.get(name))
+    if not (VALUES_LIMITS.get(name).start <= int(value) <= VALUES_LIMITS.get(name).stop):
+        return (False, VALUES_LIMITS.get(name))
+
+    return (True, VALUES_LIMITS.get(name))
+
+
+def code2mode(code: int) -> str:
     return CODE_2_MODE.get(code)
 
 
-def mode2code(mode: str):
+def mode2code(mode: str) -> int:
     return MODE_2_CODE.get(mode)
 
 
-def mods2code(mods: list[str]):
+def mods2code(mods: list[str]) -> int:
     return sum([MODS_2_CODES.get(mod) for mod in mods])
 
 
-def code2mods(code: int):
+def code2mods(code: int) -> str:
     mod_list = []
     code = bin(code)[:1:-1]
     for i in range(len(CODES_2_MODS.keys())):
@@ -120,3 +145,12 @@ def get_from_tree(dictionary: dict, *path: any) -> any:
         except KeyError:
             return None
     return value
+
+
+def is_int(value: any):
+    try:
+        assert int(value) == float(value)
+    except (AssertionError, ValueError):
+        return False
+    else:
+        return True

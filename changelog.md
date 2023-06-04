@@ -1,5 +1,14 @@
 # Changelog
 
+## 2023.6.04.1
+
+### Added
+
+- simple interface
+- limits for some arguments
+- func for checking limit
+
+
 ## 2023.6.04.0
 
 ### Added
