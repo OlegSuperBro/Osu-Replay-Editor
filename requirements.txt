@@ -1,1 +1,4 @@
 osrparse
+rosu-pp-py
+pyosudb
+pyyaml

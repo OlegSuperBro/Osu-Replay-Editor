@@ -3,6 +3,7 @@ from os.path import isfile
 from osrparse import Replay, Mod
 
 import utils
+import calculation
 
 
 def generate_mods_checkboxes(replay, width: int):
@@ -31,6 +32,8 @@ class App:
         self.replay_path = replay_path
         self.window = self.create_window()
 
+        # psg.set_options(suppress_error_popups=True, suppress_raise_key_errors=True, suppress_key_guessing=True)
+
         self.BUTTON_FUNCS = {
             "-UPDATE-": lambda: self.update_info(),
             "-OPEN_REPLAY-": lambda: self.open_replay(),
@@ -41,7 +44,7 @@ class App:
 
     def main_loop(self) -> None:
         while True:
-            self.event, self.values = self.window.read()
+            self.event, self.values = self.window.read(timeout=10)
 
             if self.event == psg.WIN_CLOSED or self.event == "-EXIT-":
                 break
@@ -51,18 +54,47 @@ class App:
             try:
                 self.BUTTON_FUNCS.get(self.event)()
             except TypeError:
-                print(f"WARNING: FUNC FOR \"{self.event}\" DON'T EXIST")
+                pass
 
-    def display_error(self, error_msg):
-        psg.popup(error_msg, title="ERROR")
+            self.update_info()
 
-    def check_info(self):
-        for value_name, value_of_value in self.values.items():
-            value_correct, value_limit = utils.check_limit(value_name, value_of_value)
-            if not value_correct:
-                self.display_error(f"{value_name} not in {value_limit}")
-                return False
-        return True
+    def create_window(self):
+        if self.opened_replay is None:
+            LAYOUT = [[psg.Text("Please, open a file")]]
+            return psg.Window("Osu replay editor", LAYOUT)
+        MENU_LAYOUT = [['&File', ['&Open::-OPEN_REPLAY-', '&Save::-SAVE-', '&Save As...::-SAVEAS-', '---', 'E&xit::-EXIT-']]]
+
+        SIMPLE_CHANGING_COL = [[psg.Text("Player"), psg.Multiline(self.opened_replay.username, key="-USERNAME-", size=(50, 5)), psg.Text("", key="-USERNAME_ERROR-")],
+                               [psg.Text("300s"), psg.Input(default_text=self.opened_replay.count_300, key="-N300-", size=(6, 1)), psg.Text("", key="-N300_ERROR-")],
+                               [psg.Text("100s"), psg.Input(default_text=self.opened_replay.count_100, key="-N100-", size=(6, 1)), psg.Text("", key="-N100_ERROR-")],
+                               [psg.Text("50s"), psg.Input(default_text=self.opened_replay.count_50, key="-N50-", size=(6, 1)), psg.Text("", key="-N50_ERROR-")],
+                               [psg.Text("Gekis"), psg.Input(default_text=self.opened_replay.count_geki, key="-NGEKIS-", size=(6, 1)), psg.Text("", key="-NGEKIS_ERROR-")],
+                               [psg.Text("Katus"), psg.Input(default_text=self.opened_replay.count_katu, key="-NKATUS-", size=(6, 1)), psg.Text("", key="-NKATUS_ERROR-")],
+                               [psg.Text("Misses"), psg.Input(default_text=self.opened_replay.count_miss, key="-NMISSES-", size=(6, 1)), psg.Text("", key="-NMISSES_ERROR-")],
+                               [psg.Text("Total score"), psg.Input(default_text=self.opened_replay.score, key="-TOTAL_SCORE-", size=(11, 1)), psg.Text("", key="-TOTAL_SCORE_ERROR-")],
+                               [psg.Text("Max combo"), psg.Input(default_text=self.opened_replay.max_combo, key="-MAX_COMBO-", size=(6, 1)), psg.Text("", key="-MAX_COMBO_ERROR-")],
+                               [psg.Text("Perfect combo"), psg.Checkbox("", key="-PFC-")],
+                               [psg.Frame("Mods", generate_mods_checkboxes(self.opened_replay, 6))],
+                               [psg.Button("Update", key="-UPDATE-")]]
+
+        SIMPLE_INFO_COL = [[psg.Text("Total accuracy: "), psg.Text("12345", key="-ACCURACY-")]]
+
+        ADVANCED_CHANGING_COL = [[psg.Text("Game mode"), psg.Combo(values=["osu", "taiko", "catch", "mania"], default_value=utils.code2mode(self.opened_replay.mode.value), key="-GAMEMODE-", readonly=True)],
+                                 [psg.Text("test2")]]
+
+        ADVANCED_INFO_COL = [[psg.Text("test3")],
+                             [psg.Text("test3")]]
+
+        SIMPLE_MAIN_LAYOUT = [[psg.Menu(MENU_LAYOUT)],
+                              [psg.Column(SIMPLE_CHANGING_COL), psg.Column(SIMPLE_INFO_COL)]]
+
+        ADVANCED_MAIN_LAYOUT = [[[psg.Column(ADVANCED_CHANGING_COL), psg.Column(ADVANCED_INFO_COL)]]]
+
+        if self.current_mode == "simple":
+            return psg.Window("Osu replay editor", SIMPLE_MAIN_LAYOUT, finalize=True)
+
+        elif self.current_mode == "advanced":
+            return psg.Window("Osu replay editor", ADVANCED_MAIN_LAYOUT, finalize=True)
 
     def update_info(self):
         if not self.check_info():
@@ -81,6 +113,34 @@ class App:
         self.opened_replay.perfect = bool(self.values["-PFC-"])
         self.opened_replay.mods = self.get_mods()
 
+        self.window["-ACCURACY-"].update(f"{str(calculation.calculate_acc(self.opened_replay))}%")
+
+        return True
+
+    def display_error(self, error_msg):
+        psg.popup(error_msg, title="ERROR")
+
+    def show_wrong_range(self, value_key: str, message: str):
+        self.window.find_element(f"-{value_key.replace('-', '')}_ERROR-", silent_on_error=True).update(message)
+
+    def hide_wrong_range(self, value_key: str):
+        try:
+            elem = self.window.find_element(f"-{value_key.replace('-', '')}_ERROR-", silent_on_error=True)
+            if not hasattr(self, "window_elements"):
+                self.window_elements = self.window.element_list()
+            if elem in self.window_elements:
+                elem.update("")
+        except AttributeError:
+            pass
+
+    def check_info(self):
+        for value_name, value_of_value in self.values.items():
+            value_correct, value_limit = utils.check_limit(value_name, value_of_value)
+            if not value_correct:
+                self.show_wrong_range(value_name, f"NOT IN {value_limit}")
+                return False
+            else:
+                self.hide_wrong_range(value_name)
         return True
 
     def get_mods(self):
@@ -89,44 +149,6 @@ class App:
             if self.values[f"-MOD_{mod.upper()}-"] is True:
                 mods.append(mod)
         return Mod(utils.mods2code(mods))
-
-    def create_window(self):
-        if self.opened_replay is None:
-            LAYOUT = [[psg.Text("Please, open a file")]]
-            return psg.Window("Osu replay editor", LAYOUT)
-        MENU_LAYOUT = [['&File', ['&Open::-OPEN_REPLAY-', '&Save::-SAVE-', '&Save As...::-SAVEAS-', '---', 'E&xit::-EXIT-']]]
-
-        SIMPLE_CHANGING_COL = [[psg.Text("Player"), psg.Multiline(self.opened_replay.username, key="-USERNAME-", size=(50, 5))],
-                               [psg.Text("300s"), psg.Input(default_text=self.opened_replay.count_300, key="-N300-", size=(6, 1))],
-                               [psg.Text("100s"), psg.Input(default_text=self.opened_replay.count_100, key="-N100-", size=(6, 1))],
-                               [psg.Text("50s"), psg.Input(default_text=self.opened_replay.count_50, key="-N50-", size=(6, 1))],
-                               [psg.Text("Gekis"), psg.Input(default_text=self.opened_replay.count_geki, key="-NGEKIS-", size=(6, 1))],
-                               [psg.Text("Katus"), psg.Input(default_text=self.opened_replay.count_katu, key="-NKATUS-", size=(6, 1))],
-                               [psg.Text("Misses"), psg.Input(default_text=self.opened_replay.count_miss, key="-NMISSES-", size=(6, 1))],
-                               [psg.Text("Total score"), psg.Input(default_text=self.opened_replay.score, key="-TOTAL_SCORE-", size=(11, 1))],
-                               [psg.Text("Max combo"), psg.Input(default_text=self.opened_replay.max_combo, key="-MAX_COMBO-", size=(6, 1))],
-                               [psg.Text("Perfect combo"), psg.Checkbox("", key="-PFC-")],
-                               [psg.Frame("Mods", generate_mods_checkboxes(self.opened_replay, 6))],
-                               [psg.Button("Update", key="-UPDATE-")]]
-
-        SIMPLE_INFO_COL = [[psg.Text("Nothing here for now :(")]]
-
-        ADVANCED_CHANGING_COL = [[psg.Text("Game mode"), psg.Combo(values=["osu", "taiko", "catch", "mania"], default_value=utils.code2mode(self.opened_replay.mode.value), key="-GAMEMODE-", readonly=True)],
-                                 [psg.Text("test2")]]
-
-        ADVANCED_INFO_COL = [[psg.Text("test3")],
-                             [psg.Text("test3")]]
-
-        SIMPLE_MAIN_LAYOUT = [[psg.Menu(MENU_LAYOUT)],
-                              [psg.Column(SIMPLE_CHANGING_COL), psg.Column(SIMPLE_INFO_COL)]]
-
-        ADVANCED_MAIN_LAYOUT = [[[psg.Column(ADVANCED_CHANGING_COL), psg.Column(ADVANCED_INFO_COL)]]]
-
-        if self.current_mode == "simple":
-            return psg.Window("Osu replay editor", SIMPLE_MAIN_LAYOUT)
-
-        elif self.current_mode == "advanced":
-            return psg.Window("Osu replay editor", ADVANCED_MAIN_LAYOUT)
 
     def switch_layout(self):
         if self.current_mode == "simple":

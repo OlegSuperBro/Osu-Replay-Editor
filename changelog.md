@@ -1,5 +1,20 @@
 # Changelog
 
+## 2023.6.12.0
+
+### Added
+
+- Calculations for some info that can be only generated/calculated
+
+### Changed
+
+- Now CLI work from CLI.py, no more main.py
+- Interface now changes dynamically
+
+### Deleted
+
+- main.py
+
 ## 2023.6.04.1
 
 ### Added
@@ -7,7 +22,6 @@
 - simple interface
 - limits for some arguments
 - func for checking limit
-
 
 ## 2023.6.04.0
 
