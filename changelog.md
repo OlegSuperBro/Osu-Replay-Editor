@@ -1,5 +1,23 @@
 # Changelog
 
+## 2023.6.12.1
+
+### Added
+
+- Configurations via yaml
+- Function to generate command for CLI
+- CLI command at bottom of window
+
+### Changed
+
+- Inteface now works throug commands to CLI.py
+- Changing funcs order in **App** class
+- Allow edit replay properties withot opening one (used for CLI command generation)
+
+### Removed
+
+- Andvanced layout type
+
 ## 2023.6.12.0
 
 ### Added

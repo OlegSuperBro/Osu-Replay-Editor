@@ -73,7 +73,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mods", type=str, metavar="mod,mod,...", help="Set mods for replay")
     parser.add_argument("--rawmods", type=int, metavar="code", help="Set mods for replay using raw value (check .osr file format wiki)")
 
-    parser.add_argument("--time", type=int, metavar="86400-inf", help="Set replay date using windows ticks")
+    parser.add_argument("--time", type=int, metavar="0-inf", help="Set replay date using windows ticks (IN UTC)")
 
     parser.add_argument("--info", action="store_true", help="Show info about replay/replays")
     parser.add_argument("-o", "--output", type=str, metavar="path", help="Set output file")
