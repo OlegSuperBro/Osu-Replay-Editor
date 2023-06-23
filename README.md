@@ -18,7 +18,9 @@ I used [venv](https://docs.python.org/3/library/venv.html)
 
 ## How to use it
 
-**Right now exists only CLI mode.** But GUI is planned
+### GUI
+
+Just run **interface.py**
 
 ### CLI
 
