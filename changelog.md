@@ -9,6 +9,7 @@
   - Real time accuracy
   - Real time pp
 - Selector for date and time when replay was played
+- Button to copy CLI command in clipboard
 
 ## 2023.6.12.1
 
