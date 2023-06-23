@@ -2,3 +2,4 @@ osrparse
 rosu-pp-py
 pyosudb
 pyyaml
+pyperclip

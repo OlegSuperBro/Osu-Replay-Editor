@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     if args.time is not None:
         for replay in replays:
-            replay.timestamp = utils.ticks2date(args.time)
+            replay.timestamp = utils.windows_ticks2date(args.time)
 
     if args.info:
         for replay in replays:

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2023.6.24.0
+
+### Added
+
+- Some info on side:
+  - Beatmap name
+  - Real time accuracy
+  - Real time pp
+- Selector for date and time when replay was played
+
 ## 2023.6.12.1
 
 ### Added

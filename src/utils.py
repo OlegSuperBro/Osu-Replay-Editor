@@ -136,8 +136,12 @@ def code2mods(code: int) -> str:
     return mod_list
 
 
-def ticks2date(ticks) -> datetime.datetime:
-    return datetime.datetime.fromtimestamp(ticks, tz=datetime.timezone.utc)
+def windows_ticks2date(ticks: int) -> datetime.datetime:
+    return datetime.datetime.fromtimestamp((ticks-621355968000000000)/10_000_000, tz=datetime.timezone.utc)
+
+
+def date2windows_ticks(date: datetime.datetime):
+    return int(date.timestamp() * 10_000_000 + 621355968000000000)
 
 
 def get_from_tree(dictionary: dict, *path: any) -> any:
@@ -159,11 +163,15 @@ def is_int(value: any):
         return True
 
 
-def generate_command(path: str = None, nickname: str = None, n300: int = None, n100: int = None, n50: int = None, ngekis: int = None, nkatus: int = None, nmisses: int = None,
+def generate_command(input_path: str = None, nickname: str = None, n300: int = None, n100: int = None, n50: int = None, ngekis: int = None, nkatus: int = None, nmisses: int = None,
                      score: int = None, maxcombo: int = None, pfc: bool = None, mods: str = None, rawmods: int = None, time: int = None, output: str = None) -> str:
     command = CLI_START_COMMAND
-    if path is not None:
-        command += f" \"{path}\""
+
+    if input_path is not None:
+        command += f" \"{input_path}\""
+
+    else:
+        command += " \"[path]\""
 
     if nickname is not None:
         command += f" --nickname {nickname}"
