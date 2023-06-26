@@ -3,3 +3,5 @@ rosu-pp-py
 pyosudb
 pyyaml
 pyperclip
+aenum
+matplotlib

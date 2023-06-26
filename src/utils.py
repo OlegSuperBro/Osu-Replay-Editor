@@ -1,88 +1,56 @@
 import datetime
+import asyncio
+from aenum import IntFlag, Enum
 from pathlib import Path
 
-MODS_2_CODES = {
-    "nm": 0,
-    "nf": 1 << 0,
-    "ez": 1 << 1,
-    "td": 1 << 2,
-    "hd": 1 << 3,
-    "hr": 1 << 4,
-    "sd": 1 << 5,
-    "dt": 1 << 6,
-    "rx": 1 << 7,
-    "ht": 1 << 8,
-    "nc": 1 << 9,
-    "fl": 1 << 10,
-    "at": 1 << 11,
-    "so": 1 << 12,
-    "ap": 1 << 13,
-    "pf": 1 << 14,
-    "4k": 1 << 15,
-    "5k": 1 << 16,
-    "6k": 1 << 17,
-    "7k": 1 << 18,
-    "8k": 1 << 19,
-    "fd": 1 << 20,
-    "rd": 1 << 21,
-    "cn": 1 << 22,
-    "tp": 1 << 23,
-    "9k": 1 << 24,
-    "co": 1 << 25,
-    "1k": 1 << 26,
-    "3k": 1 << 27,
-    "2k": 1 << 28,
-    "v2": 1 << 29,
-    "mr": 1 << 30,
-}
 
-CODES_2_MODS = {
-    1 << 0: "nm",
-    1 << 1: "nf",
-    1 << 2: "ez",
-    1 << 3: "td",
-    1 << 4: "hd",
-    1 << 5: "hr",
-    1 << 6: "sd",
-    1 << 7: "rx",
-    1 << 8: "ht",
-    1 << 9: "nc",
-    1 << 10: "fl",
-    1 << 11: "at",
-    1 << 12: "so",
-    1 << 13: "ap",
-    1 << 14: "pf",
-    1 << 15: "4k",
-    1 << 16: "5k",
-    1 << 17: "6k",
-    1 << 18: "7k",
-    1 << 19: "8k",
-    1 << 20: "fd",
-    1 << 21: "rd",
-    1 << 22: "cn",
-    1 << 23: "tp",
-    1 << 24: "9k",
-    1 << 25: "co",
-    1 << 26: "1k",
-    1 << 27: "3k",
-    1 << 28: "2k",
-    1 << 29: "v2",
-    1 << 30: "mr",
-}
+class GameMode(Enum):
+    """
+    Literaly same as Gamemode from osrparse, except this one uses aenum.Enum, except enum.Enum
+    """
+    STD = 0
+    TAIKO = 1
+    CTB = 2
+    MANIA = 3
 
-CODE_2_MODE = {
-    0: "osu",
-    1: "taiko",
-    2: "catch",
-    3: "mania"
-}
 
-MODE_2_CODE = {
-    "osu": 0,
-    "taiko": 1,
-    "catch": 2,
-    "mania": 3,
-}
+class Mod(IntFlag):
+    """
+    Literaly same as Mod from osrparse, except this one uses aenum.IntFlag, except enum.IntFlag
+    """
+    NoMod = 0
+    NoFail = 1 << 0
+    Easy = 1 << 1
+    TouchDevice = 1 << 2
+    Hidden = 1 << 3
+    HardRock = 1 << 4
+    SuddenDeath = 1 << 5
+    DoubleTime = 1 << 6
+    Relax = 1 << 7
+    HalfTime = 1 << 8
+    Nightcore = 1 << 9
+    Flashlight = 1 << 10
+    Autoplay = 1 << 11
+    SpunOut = 1 << 12
+    Autopilot = 1 << 13
+    Perfect = 1 << 14
+    Key4 = 1 << 15
+    Key5 = 1 << 16
+    Key6 = 1 << 17
+    Key7 = 1 << 18
+    Key8 = 1 << 19
+    FadeIn = 1 << 20
+    Random = 1 << 21
+    Cinema = 1 << 22
+    Target = 1 << 23
+    Key9 = 1 << 24
+    KeyCoop = 1 << 25
+    Key1 = 1 << 26
+    Key3 = 1 << 27
+    Key2 = 1 << 28
+    ScoreV2 = 1 << 29
+    Mirror = 1 << 30
+
 
 VALUES_LIMITS = {
     "-GAME_VER-": range(0, 2147483647),
@@ -99,6 +67,12 @@ VALUES_LIMITS = {
 CLI_START_COMMAND = f"py \"{Path(__file__).parent}\\CLI.py\""
 
 
+def mods_list() -> list[str]:
+    mod_list = list(map(lambda c: c.name, Mod))
+    mod_list.remove("Target")  # it will break replay
+    return mod_list
+
+
 def check_limit(name: str, value: any) -> tuple[bool, int]:
     limit = VALUES_LIMITS.get(name)
     if limit is None:
@@ -112,28 +86,22 @@ def check_limit(name: str, value: any) -> tuple[bool, int]:
     return (True, VALUES_LIMITS.get(name))
 
 
-def code2mode(code: int) -> str:
-    return CODE_2_MODE.get(code)
+def code2gamemode(code: int) -> str:
+    return GameMode(code).name
 
 
-def mode2code(mode: str) -> int:
-    return MODE_2_CODE.get(mode)
+def gamemode2code(mode: str) -> int:
+    return GameMode[mode].value
 
 
 def mods2code(mods: list[str]) -> int:
-    return sum([MODS_2_CODES.get(mod) for mod in mods])
+    if len(mods) == 0:
+        return 0
+    return Mod["|".join(mods)].value
 
 
 def code2mods(code: int) -> str:
-    mod_list = []
-    code = bin(code)[:1:-1]
-    for i in range(len(CODES_2_MODS.keys())):
-        try:
-            if code[i] == "1":
-                mod_list.append(CODES_2_MODS.get(1 << i))
-        except IndexError:
-            break
-    return mod_list
+    return Mod(code).name.split("|")
 
 
 def windows_ticks2date(ticks: int) -> datetime.datetime:
@@ -157,7 +125,7 @@ def get_from_tree(dictionary: dict, *path: any) -> any:
 def is_int(value: any):
     try:
         assert int(value) == float(value)
-    except (AssertionError, ValueError):
+    except (AssertionError, ValueError, TypeError):
         return False
     else:
         return True
@@ -216,3 +184,10 @@ def generate_command(input_path: str = None, nickname: str = None, n300: int = N
         command += f" -o \"{output}\""
 
     return command
+
+
+def run_async(func):
+    def wrapper(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, func, *args, **kwargs)
+
+    return wrapper

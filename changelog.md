@@ -1,5 +1,21 @@
 # Changelog
 
+## 2023.6.26.0
+
+### Added
+
+- Life graph viewer (no editing for now)
+
+### Changed
+
+- Small clean up
+- All windows now using template window
+- Mods now have full names
+
+### Removed
+
+- Target practice mod from mod list (can break replay)
+
 ## 2023.6.24.0
 
 ### Added
