@@ -1,7 +1,10 @@
 import datetime
 import asyncio
+import numpy as np
 from aenum import IntFlag, Enum
 from pathlib import Path
+from osrparse.utils import LifeBarState
+from typing import List
 
 
 class GameMode(Enum):
@@ -131,8 +134,12 @@ def is_int(value: any):
         return True
 
 
+def lifebar2str(lifebar: List[LifeBarState]):
+    return ",".join([f"{state.time}|{state.life}" for state in lifebar])
+
+
 def generate_command(input_path: str = None, nickname: str = None, n300: int = None, n100: int = None, n50: int = None, ngekis: int = None, nkatus: int = None, nmisses: int = None,
-                     score: int = None, maxcombo: int = None, pfc: bool = None, mods: str = None, rawmods: int = None, time: int = None, output: str = None) -> str:
+                     score: int = None, maxcombo: int = None, pfc: bool = None, mods: str = None, rawmods: int = None, time: int = None, lifebar: str = None, output: str = None) -> str:
     command = CLI_START_COMMAND
 
     if input_path is not None:
@@ -180,6 +187,9 @@ def generate_command(input_path: str = None, nickname: str = None, n300: int = N
     if time is not None:
         command += f" --time {time}"
 
+    if lifebar is not None:
+        command += f" --lifebar \"{lifebar}\""
+
     if output is not None:
         command += f" -o \"{output}\""
 
@@ -191,3 +201,17 @@ def run_async(func):
         return asyncio.get_event_loop().run_in_executor(None, func, *args, **kwargs)
 
     return wrapper
+
+
+def dist_point_to_segment(p, s0, s1):
+    """
+    Get the distance from the point *p* to the segment (*s0*, *s1*), where
+    *p*, *s0*, *s1* are ``[x, y]`` arrays.
+    """
+    s01 = s1 - s0
+    s0p = p - s0
+    if (s01 == 0).all():
+        return np.hypot(*s0p)
+    # Project onto segment, without going past segment ends.
+    p1 = s0 + np.clip((s0p @ s01) / (s01 @ s01), 0, 1) * s01
+    return np.hypot(*(p - p1))

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2023.7.2.0
+
+### Added
+
+- Changing lifebar data via CLI
+- Changing lifebar with UI using matplotlib
+
+### Chaged
+- UI was been reworked a bit
+
+### Fixed
+
+- Perfect bug (was always true)
+
 ## 2023.6.26.0
 
 ### Added
@@ -11,6 +25,7 @@
 - Small clean up
 - All windows now using template window
 - Mods now have full names
+- No more dicts for mods with name->code and code->name
 
 ### Removed
 

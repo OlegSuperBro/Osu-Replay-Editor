@@ -1,5 +1,6 @@
 import argparse
 from osrparse import Replay, Mod
+from osrparse.utils import LifeBarState
 from os.path import isdir, join, exists
 from os import mkdir
 import glob
@@ -78,6 +79,8 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--info", action="store_true", help="Show info about replay/replays")
     parser.add_argument("-o", "--output", type=str, metavar="path", help="Set output file")
 
+    parser.add_argument("--lifebar", type=str, help="Set lifebar data")
+
     return parser
 
 
@@ -137,7 +140,7 @@ if __name__ == "__main__":
 
     if args.pfc is not None:
         for replay in replays:
-            replay.perfect = args.pfc
+            replay.perfect = True if args.pfc == "True" else False
 
     if args.mods is not None:
         for replay in replays:
@@ -155,6 +158,10 @@ if __name__ == "__main__":
         for replay in replays:
             print("Replay: " + replay.path)
             show_replay_info(replay)
+
+    if args.lifebar:
+        for replay in replays:
+            replay.life_bar_graph = [LifeBarState(int(life_dot.split("|")[0]), float(life_dot.split("|")[1])/100) for life_dot in args.lifebar.split(",")]
 
     if args.output is not None:
         # if only 1 replay given
