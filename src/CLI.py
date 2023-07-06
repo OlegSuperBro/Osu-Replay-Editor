@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     if args.lifebar:
         for replay in replays:
-            replay.life_bar_graph = [LifeBarState(int(life_dot.split("|")[0]), float(life_dot.split("|")[1])/100) for life_dot in args.lifebar.split(",")]
+            replay.life_bar_graph = [LifeBarState(int(life_dot.split("|")[0]), float(life_dot.split("|")[1])) for life_dot in args.lifebar.split(",")]
 
     if args.output is not None:
         # if only 1 replay given

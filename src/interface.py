@@ -1,440 +1,278 @@
-import PySimpleGUI as psg
+import dearpygui.dearpygui as dpg
 import os
-import sys
+import datetime
 import pyperclip
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from math import ceil
 from pyosudb import parse_osudb
-from copy import deepcopy
 from pathlib import Path
-from datetime import datetime
 from osrparse import Replay, Mod
 from osrparse.utils import LifeBarState
-from typing import Self
 
 import utils
 import calculation
 from config import CONFIG
 
 
-def generate_mods_checkboxes(width: int):
+def generate_mods_checkboxes(width, callback):
     mod_list = utils.mods_list()
 
     height = ceil(len(mod_list) / width)
 
-    layout = []
-    tmp_text_column = []
-    tmp_checkbox_column = []
-
     mod_index = 0
 
-    for _ in range(width):
+    with dpg.table(header_row=False):
+        for _ in range(width):
+            dpg.add_table_column()
+
         for _ in range(height):
-            try:
-                mod = mod_list[mod_index]
-                mod_index += 1
-            except IndexError:
-                mod_index += 1
-                continue
-
-            tmp_text_column.append(psg.Text(mod, pad=((0, 0), (3, 7)), justification="right", size=(10, 1)))
-            tmp_checkbox_column.append(psg.Checkbox("", key=f"-ATTR_MOD_{mod.upper()}-", metadata=Mod[mod], enable_events=True))
-
-        tmp_column = psg.Column([[psg.Column([[text] for text in tmp_text_column]), psg.Column([[checkbox] for checkbox in tmp_checkbox_column])]])
-        tmp_text_column = []
-        tmp_checkbox_column = []
-        layout.append(tmp_column)
-
-    return [layout]
+            with dpg.table_row():
+                for _ in range(width):
+                    try:
+                        mod = mod_list[mod_index]
+                        mod_index += 1
+                    except IndexError:
+                        mod_index += 1
+                        continue
+                    dpg.add_checkbox(label=mod, tag=f"mod_{mod}", callback=callback)
 
 
-class TemplateWindow:
-    LAYOUT = [[]]
-    EVENT_FUNCS = {}
-
-    WINDOW_NAME = "template"
-    WINDOW_SIZE = ()
-    WINDOW_TIMEOUT = 100
-
+class MainWindow():
     def __init__(self) -> None:
-        if len(self.WINDOW_SIZE) != 2:
-            self.window = psg.Window(self.WINDOW_NAME, deepcopy(self.LAYOUT), finalize=True)
-        else:
-            self.window = psg.Window(self.WINDOW_NAME, deepcopy(self.LAYOUT), finalize=True, size=self.WINDOW_SIZE)
-
-        self.EVENT_FUNCS = {}  # should be re-defined in __init__
-
-    def main_loop(self) -> None:
-        while True:
-            self._loop_step()
-
-    def _start(self) -> None:
-        self.main_loop()
-
-    def _loop_step(self, timeout: int = WINDOW_TIMEOUT) -> None:
-        self.event, self.values = self.window.read(timeout=timeout)
-
-        if self.event == psg.WIN_CLOSED or self.event == "-EXIT-":
-            sys.exit(0)
-
-        self.event = self.event.split("::")[-1:][0]  # bruh
-
-        tmp_func = self.EVENT_FUNCS.get(self.event)
-        if tmp_func is not None:
-            tmp_func()
-
-    def change_window(self, window: Self):
-        self.window.close()
-        del self
-        window._start()
-
-    @utils.run_async
-    def open_window(self, window: Self):
-        window._start()
-
-    def show_error(self, error_msg):
-        psg.popup(error_msg, title="ERROR")
-
-
-class MainWindow(TemplateWindow):
-    WINDOW_NAME = "Replay Editor"
-    WINDOW_SIZE = (1200, 700)
-    WINDOW_TIMEOUT = None
-
-    TOOLBAR_LAYOUT = [['&File', ['&Open::-OPEN_REPLAY-', '&Save::-SAVE-', '&Save As...::-SAVEAS-', '---', 'E&xit::-EXIT-']]]
-
-    MENU_LAYOUT = [[psg.Column([[]], size=(50, 0))],  # TODO maybe add logo or drag'n'drop?
-                   [psg.Button("Attributes", key="-SWITCH_ATTR-", expand_x=True)],
-                   [psg.Button("Life Graph", key="-SWITCH_LIFE-", expand_x=True)],
-                   [psg.Button("Replay data (WIP)", key="-SWITCH_DATA-", expand_x=True)]]
-
-    ATTR_TEXT_COL = psg.Column([[psg.Text("Player", pad=((0, 0), (0, 65)), justification="right", expand_x=True)],
-                                [psg.Text("300s", justification="right", expand_x=True)],
-                                [psg.Text("100s", justification="right", expand_x=True)],
-                                [psg.Text("50s", justification="right", expand_x=True)],
-                                [psg.Text("Gekis", justification="right", expand_x=True)],
-                                [psg.Text("Katus", justification="right", expand_x=True)],
-                                [psg.Text("Misses", justification="right", expand_x=True)],
-                                [psg.Text("Total score", justification="right", expand_x=True)],
-                                [psg.Text("Max combo", justification="right", expand_x=True)],
-                                [psg.Text("Perfect combo", justification="right", expand_x=True)],
-                                [psg.Text("Date", pad=((0, 0), (10, 0)), justification="right", expand_x=True)]])
-
-    ATTR_INPUT_COL = psg.Column([[psg.Multiline(default_text="", key="-ATTR_USERNAME-", size=(50, 5), enable_events=True), psg.Text("", key="-USERNAME_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_N300-", size=(12, 1), enable_events=True), psg.Text("", key="-N300_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_N100-", size=(12, 1), enable_events=True), psg.Text("", key="-N100_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_N50-", size=(12, 1), enable_events=True), psg.Text("", key="-N50_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_NGEKIS-", size=(12, 1), enable_events=True), psg.Text("", key="-NGEKIS_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_NKATUS-", size=(12, 1), enable_events=True), psg.Text("", key="-NKATUS_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_NMISSES-", size=(12, 1), enable_events=True), psg.Text("", key="-NMISSES_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_TOTAL_SCORE-", size=(12, 1), enable_events=True), psg.Text("", key="-TOTAL_SCORE_ERROR-")],
-                                 [psg.Input(default_text="0", key="-ATTR_MAX_COMBO-", size=(12, 1), enable_events=True), psg.Text("", key="-MAX_COMBO_ERROR-")],
-                                 [psg.Checkbox("", key="-PFC-", enable_events=True)],
-
-                                 [psg.CalendarButton("", key="-ATTR_TIMESTAMP_DATE-", target=(psg.ThisRow, 0), close_when_date_chosen=False, format="%d/%m/%Y", enable_events=True),
-                                 psg.Spin(list(range(0, 24)), key="-ATTR_TIMESTAMP_HOUR-", initial_value=datetime.today().strftime("%H"), size=(2, 1), enable_events=True),
-                                 psg.Spin(list(range(0, 60)), key="-ATTR_TIMESTAMP_MINUTE-", initial_value=datetime.today().strftime("%M"), size=(2, 1), enable_events=True),
-                                 psg.Spin(list(range(0, 60)), key="-ATTR_TIMESTAMP_SECOND-", initial_value=datetime.today().strftime("%S"), size=(2, 1), enable_events=True)]])
-
-    ATTRIBUTES_LAYOUT = [[psg.Column([[ATTR_TEXT_COL, ATTR_INPUT_COL],
-                         [psg.Frame("Mods", generate_mods_checkboxes(5))]])]]
-    LIFE_GRAPH_LAYOUT = [[psg.Canvas(key="-LIFE_GRAPH-", expand_x=True, expand_y=False)]]
-    REPLAY_DATA_LAYOUT = [[]]
-
-    EDITING_COLUMN = psg.Column([[psg.Column(ATTRIBUTES_LAYOUT, key="-ATTR-"), psg.Column(LIFE_GRAPH_LAYOUT, visible=False, key="-LIFE-"), psg.Column(REPLAY_DATA_LAYOUT, visible=False, key="-DATA-")]])
-
-    INFO_COL = psg.Column([[psg.Text("Beatmap: "), psg.Text("None", key="-INFO_BEATMAP-")],
-                           [psg.Text("Total accuracy: "), psg.Text("None", key="-INFO_ACCURACY-")],
-                           [psg.Text("Total PP: "), psg.Text("None", key="-INFO_PP-")],
-                           [psg.VPush()]],
-                          expand_y=True)
-
-    LAYOUT = [[psg.Menu(TOOLBAR_LAYOUT)],
-              [psg.Column(MENU_LAYOUT, size=(200, WINDOW_SIZE[1])), psg.Column([[EDITING_COLUMN, INFO_COL],
-                                                                                [psg.VPush()],
-                                                                                [psg.InputText(key="-CLI_COMMAND-", readonly=True, expand_x=True), psg.Button("Copy", key="-COPY_CLI-")]], expand_x=True, expand_y=True)]]
-
-    current_layout = "-ATTR-"
-
-    EPSILON = 5
-
-    def __init__(self) -> None:
-        super().__init__()
-
         self.osu_db = parse_osudb(Path(CONFIG.get("osu_path")) / "osu!.db")
         # self.osu_db = None
-        self.replay_path = None
         self.replay = None
+        self.replay_path = None
 
-        self.EVENT_FUNCS = {
-            "-OPEN_REPLAY-": lambda: self.open_replay(),
-            "-SAVE-": lambda: self.save_replay(),
-            "-SAVEAS-": lambda: self.save_as_replay(),
-            "-COPY_CLI-": lambda: self.clipboard_copy_CLI_command(),
-            "-SWITCH_ATTR-": lambda: self.switch_layout("-ATTR-"),
-            "-SWITCH_LIFE-": lambda: self.switch_layout("-LIFE-"),
-            # "-SWITCH_DATA-": lambda: self.switch_layout("-DATA-"),  # TODO uncomment when data editing is done
-            }
+        self.lifebar_graph_dict = {}
 
-        self.attr_init()
-        self.life_init()
+        dpg.create_context()
+        if os.path.exists("dpg.ini"):
+            dpg.configure_app(init_file="dpg.ini")
+        dpg.create_viewport(title='Replay Editor', width=1500, height=900)
 
-        self._loop_step(1)
+        self.build_window()
 
-    def _loop_step(self, timeout: int = WINDOW_TIMEOUT):
-        super()._loop_step(timeout)
+        dpg.setup_dearpygui()
+        dpg.show_viewport()
+        dpg.start_dearpygui()
+        dpg.destroy_context()
 
-        self.update_info()
+    def build_window(self):
+        with dpg.viewport_menu_bar():
+            with dpg.menu(label="File"):
+                dpg.add_menu_item(label="Open", callback=lambda: dpg.configure_item("open_file_dialog", show=True))
+                dpg.add_menu_item(label="Save", callback=lambda: self.save_replay(self.replay_path))
+                dpg.add_menu_item(label="Save as...", callback=lambda: self.save_as_replay())
+            with dpg.menu(label="View"):
+                with dpg.menu(label="Show"):
+                    dpg.add_menu_item(label="Attributes editor", callback=self.build_attr)
+                    dpg.add_menu_item(label="Life graph editor", callback=self.build_life)
+                    # dpg.add_menu_item(label="Data editor")
+                    dpg.add_menu_item(label="Replay information", callback=self.build_info)
+                    dpg.add_menu_item(label="CLI command", callback=self.build_CLI)
 
-    # ------------------------ATTRIBUTES------------------------ #
-    def attr_init(self):
-        pass
+        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=250, height=100):
+            dpg.add_text("", tag="error_text")
+            dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item("error_popup", show=False))
 
-    def attr_show_wrong_range(self, value_key: str, message: str):
-        self.window.find_element(f"-{value_key.replace('-', '')}_ERROR-", silent_on_error=True).update(message)
+        with dpg.file_dialog(directory_selector=False, tag="save_file_dialog", min_size=(250, 250), default_filename="replay", default_path=Path(CONFIG.get("osu_path")) / "Replays", show=False, callback=(lambda x, y: [self.save_replay(list(y.values())[0]), dpg.configure_item("save_file_dialog", show=False)]), cancel_callback=lambda x, y: dpg.configure_item("save_file_dialog", show=False)):
+            dpg.add_file_extension(".osr")
+            dpg.add_file_extension("")
 
-    def attr_check_info(self):
-        for value_name, value_of_value in self.values.items():
-            value_correct, value_limit = utils.check_limit(value_name, value_of_value)
-            if not value_correct:
-                self.attr_show_wrong_range(value_name, f"NOT IN {value_limit}")
-                return False
-            else:
-                self.attr_hide_wrong_range(value_name)
-        return True
+        with dpg.file_dialog(directory_selector=False, tag="open_file_dialog", min_size=(250, 250), default_path=Path(CONFIG.get("osu_path")) / "Replays", show=False, callback=(lambda x, y: [self.open_replay(list(y.values())[0]), dpg.configure_item("open_file_dialog", show=False)]), cancel_callback=lambda x, y: dpg.configure_item("open_file_dialog", show=False)):
+            dpg.add_file_extension(".osr")
+            dpg.add_file_extension("")
 
-    def attr_hide_wrong_range(self, value_key: str):
-        try:
-            elem = self.window.find_element(f"-{value_key.replace('-', '')}_ERROR-", silent_on_error=True)
-            if not hasattr(self, "window_elements"):
-                self.window_elements = self.window.element_list()
-            if elem in self.window_elements:
-                elem.update("")
-        except AttributeError:
-            pass
+        self.build_attr()
+        self.build_life()
+        self.build_CLI()
+        self.build_info()
 
-    def attr_get_mods(self):
-        mods = []
-        for mod in utils.mods_list():
-            if self.values[f"-ATTR_MOD_{mod.upper()}-"] is True:
-                mods.append(mod)
-        return Mod(utils.mods2code(mods))
-
-    # ------------------------LIFE GRAPH------------------------ #
-
-    def life_init(self):
-        try:
-            self.life_graph_data = ([x.time for x in self.replay.life_bar_graph], [x.life * 100 for x in self.replay.life_bar_graph])
-        except AttributeError:
-            self.life_graph_data = ([0], [0])
-
-        self.fig, self.life_axes = plt.subplots()
-
-        self.life_line = Line2D(*self.life_graph_data, marker="o", markeredgecolor="r", markersize=4, animated=True)
-
-        self.life_axes.add_line(self.life_line)
-
-        self.canvas = self.life_line.get_figure().canvas
-
-        self.life_line.get_figure().canvas.mpl_connect('draw_event', self.life_on_draw)
-        self.life_line.get_figure().canvas.mpl_connect('button_press_event', self.life_on_button_press)
-        self.life_line.get_figure().canvas.mpl_connect('button_release_event', self.life_on_button_release)
-        self.life_line.get_figure().canvas.mpl_connect('motion_notify_event', self.life_on_mouse_move)
-
-        self.life_axes.set_xlim(0, self.life_graph_data[0][-1:][0])
-        self.life_axes.set_ylim(0, 100)
-        plt.xlabel('Ticks')
-        plt.ylabel('%')
-        plt.grid()
-
-        figure_canvas_agg = FigureCanvasTkAgg(self.fig, master=self.window['-LIFE_GRAPH-'].TKCanvas)
-        figure_canvas_agg.draw()
-        figure_canvas_agg.get_tk_widget().pack(side='left', fill='both', expand=1)
-
-        self.life_cur_index = None
-
-    def life_get_ind_under_point(self, event):
-        """
-        Return the index of the point closest to the event position or *None*
-        if no point is within ``self.EPSILON`` to the event position.
-        """
-        xy = np.asarray(self.life_line.get_xydata())
-        xyt = self.life_line.get_transform().transform(xy)
-        xt, yt = xyt[:, 0], xyt[:, 1]
-        d = np.hypot(xt - event.x, yt - event.y)
-        indseq, = np.nonzero(d == d.min())
-        ind = indseq[0]
-
-        if d[ind] >= self.EPSILON:
-            ind = None
-
-        return ind
-
-    def life_on_draw(self, event):
-        self.background = self.life_line.get_figure().canvas.copy_from_bbox(self.life_axes.bbox)
-        self.life_axes.draw_artist(self.life_line)
-
-    def life_on_button_press(self, event):
-        """Callback for mouse button presses."""
-        if event.inaxes is None:
+    def build_attr(self, sender=None, user_data=None):
+        if dpg.does_item_exist("attr_window") is True:
+            dpg.focus_item("attr_window")
             return
-        if event.button != 1:
+        with dpg.window(label="Attributes", pos=(0, 20), min_size=(650, 100), tag="attr_window", on_close=lambda sender: None if sender != "attr_window" else dpg.delete_item("attr_window")):
+            with dpg.group(horizontal=True):
+                with dpg.group():
+                    dpg.add_text("Player")
+                    dpg.add_spacer(height=67)
+                    dpg.add_text("300s")
+                    dpg.add_text("100s")
+                    dpg.add_text("50s")
+                    dpg.add_text("Gekis")
+                    dpg.add_text("Katus")
+                    dpg.add_text("Misses")
+                    dpg.add_text("Total score")
+                    dpg.add_text("Max combo")
+                    dpg.add_text("Perfect combo")
+                    dpg.add_text("Date and time")
+                    dpg.add_text("Mods")
+                with dpg.group():
+                    dpg.add_input_text(multiline=True, height=90, tab_input=True, tag="username", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="300s", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="100s", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="50s", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="gekis", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="katus", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="misses", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=2147483647, max_clamped=True, tag="total_score", callback=self.update_info_window)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="max_combo", callback=self.update_info_window)
+                    dpg.add_checkbox(tag="perfect_combo", callback=self.update_info_window)
+                    with dpg.tree_node(label="Date picker"):
+                        dpg.add_time_picker(tag="time", callback=self.update_info_window)
+                        dpg.add_date_picker(default_value={"month_day": datetime.date.today().day, "year": datetime.date.today().year-2000 + 100, "month": datetime.date.today().month}, tag="date", callback=self.update_info_window)  # Date
+                    dpg.add_spacer(height=5)
+                    with dpg.tree_node(label="Mods"):
+                        generate_mods_checkboxes(5, self.update_info_window)
+
+    def build_life(self, sender=None, user_data=None):
+        if dpg.does_item_exist("life_window") is True:
+            dpg.focus_item("life_window")
             return
-        self.life_cur_index = self.life_get_ind_under_point(event)
+        with dpg.window(label="Life Graph", pos=(0, 400), width=650, height=405, min_size=(500, 250), tag="life_window", on_close=lambda: dpg.delete_item("life_window")):
+            with dpg.plot(height=-1, width=-1, tag="life_graph"):
+                dpg.add_plot_legend()
+                dpg.add_plot_axis(dpg.mvXAxis, label="x", tag="x_axis")
+                dpg.add_plot_axis(dpg.mvYAxis, label="y", tag="y_axis")
+                dpg.set_axis_limits("y_axis", 0, 1)
 
-    def life_on_button_release(self, event):
-        """Callback for mouse button releases."""
-        if event.button != 1:
+    def build_CLI(self, sender=None, user_data=None):
+        if dpg.does_item_exist("CLI_window") is True:
+            dpg.focus_item("CLI_command")
             return
-        self.life_cur_index = None
+        with dpg.window(label="CLI command", pos=(0, 807), width=650, min_size=(400, 50), no_scrollbar=True, max_size=(30000, 50), tag="CLI_window", on_close=lambda: dpg.delete_item("CLI_window")):
+            with dpg.group(horizontal=True):
+                dpg.add_input_text(width=-135, readonly=True, tag="cli_command")
+                dpg.add_button(label="Copy to clipboard", callback=self.clipboard_copy_CLI_command)
 
-    def life_on_mouse_move(self, event):
-        if self.life_cur_index is None:
+    def build_info(self, sender=None, user_data=None):
+        if dpg.does_item_exist("info_window") is True:
+            dpg.focus_item("info_window")
             return
-        if event.inaxes is None:
-            return
-        if event.button != 1:
-            return
-        x, y = event.xdata, event.ydata
 
-        if self.life_cur_index < len(self.life_graph_data[0]) and x <= self.life_graph_data[0][self.life_cur_index - 1]:
-            x = self.life_graph_data[0][self.life_cur_index - 1]
-        if self.life_cur_index > 0 and x >= self.life_graph_data[0][self.life_cur_index + 1]:
-            x = self.life_graph_data[0][self.life_cur_index + 1]
+        with dpg.window(label="Replay Information", pos=(650, 20), width=835, min_size=(250, 250), tag="info_window", on_close=lambda: dpg.delete_item("info_window")):
+            with dpg.group(horizontal=True):
+                with dpg.group():
+                    dpg.add_text("Beatmap name")
+                    dpg.add_spacer()
+                    dpg.add_text("Total accuracy")
+                    dpg.add_text("Total pp")
+                with dpg.group():
+                    dpg.add_text(tag="beatmap_name")
+                    dpg.add_text(tag="total_accuracy")
+                    dpg.add_text(tag="total_pp")
 
-        if y >= 100:
-            y = 100
-        if y <= 0:
-            y = 0
+    def update_info_window(self, sender=None, user_data=None):
+        n300 = dpg.get_value("300s")
+        n100 = dpg.get_value("100s")
+        n50 = dpg.get_value("50s")
+        n_geki = dpg.get_value("gekis")
+        n_katu = dpg.get_value("katus")
+        n_miss = dpg.get_value("misses")
+        max_combo = dpg.get_value("max_combo")
 
-        self.life_graph_data[0][self.life_cur_index], self.life_graph_data[1][self.life_cur_index] = int(x), y
-        if self.life_cur_index == 0:
-            self.life_graph_data[0][-1], self.life_graph_data[1][-1] = int(x), y
-        elif self.life_cur_index == len(list(zip(*self.life_graph_data))) - 1:
-            self.life_graph_data[0][0], self.life_graph_data[1][0] = int(x), y
+        beatmap_name = "None"
+        acc = calculation.calculate_acc(n300, n100, n50, n_miss)
+        pp = 0
 
-        self.life_update_graph()
+        if self.replay is not None:
+            beatmap = self.osu_db.get_beatmap_from_hash(self.replay.beatmap_hash)
+            beatmap_name = f"{beatmap.artist} / {beatmap.title}"
+            beatmap_path = str(Path(CONFIG.get("osu_path")) / "songs" / beatmap.folder_name / beatmap.osu_file)
+            pp = calculation.calculate_pp(beatmap_path, mode=self.replay.mode, mods=Mod(self.get_mods()), n_geki=n_geki, n_katu=n_katu, n300=n300, n100=n100, n50=n50, n_misses=n_miss, combo=max_combo)
 
-    def life_update_graph(self):
-        self.life_line.set_data(self.life_graph_data)
+        dpg.set_value("beatmap_name", beatmap_name)
+        dpg.set_value("total_accuracy", acc)
+        dpg.set_value("total_pp", f"{str(pp)}pp")
+        dpg.set_value("cli_command", self.generate_CLI_command())
 
-        self.life_line.get_figure().canvas.restore_region(self.background)
-        self.life_axes.draw_artist(self.life_line)
-        self.life_line.get_figure().canvas.blit(self.life_axes.bbox)
-
-    # ---------------------------OTHER--------------------------- #
     def generate_CLI_command(self, output_path: str = "[output]"):
-        if self.replay is not None and self.values["-ATTR_TIMESTAMP_DATE-"] == "":
-            self.values["-ATTR_TIMESTAMP_DATE-"] = self.replay.timestamp.strftime("%d/%m/%Y")
-        elif self.values["-ATTR_TIMESTAMP_DATE-"] == "":
-            self.values["-ATTR_TIMESTAMP_DATE-"] = datetime.today().strftime("%d/%m/%Y")
-
-        date = datetime.strptime(f"{self.values['-ATTR_TIMESTAMP_DATE-']} {self.values['-ATTR_TIMESTAMP_HOUR-']}:{self.values['-ATTR_TIMESTAMP_MINUTE-']}:{self.values['-ATTR_TIMESTAMP_SECOND-']}", "%d/%m/%Y %H:%M:%S")
+        date = dpg.get_value("date")
+        time = dpg.get_value("time")
+        date_time = datetime.datetime.strptime(f'{date.get("year") - 100 + 2000}/{date.get("month")}/{date.get("month_day")} {time.get("hour")}:{time.get("min")}:{time.get("sec")}', "%Y/%m/%d %H:%M:%S")
+        lifebar = utils.lifebar2str([LifeBarState(int(state.get("x")), round(state.get("y"), 2)) for state in self.lifebar_graph_dict.values()]) if self.replay is not None else None
+        print(self.lifebar_graph_dict, lifebar)
         return utils.generate_command(self.replay_path,
-                                      self.values["-ATTR_USERNAME-"], self.values["-ATTR_N300-"], self.values["-ATTR_N100-"], self.values["-ATTR_N50-"],
-                                      self.values["-ATTR_NGEKIS-"], self.values["-ATTR_NKATUS-"], self.values["-ATTR_NMISSES-"], self.values["-ATTR_TOTAL_SCORE-"],
-                                      self.values["-ATTR_MAX_COMBO-"], self.values["-PFC-"], None, self.attr_get_mods(), utils.date2windows_ticks(date), utils.lifebar2str([LifeBarState(int(time), life) for time, life in zip(*self.life_graph_data)]) if self.replay is not None else None, output_path)
+                                      dpg.get_value("username"), dpg.get_value("300s"), dpg.get_value("100s"), dpg.get_value("50s"), dpg.get_value("gekis"), dpg.get_value("katus"), dpg.get_value("misses"),
+                                      dpg.get_value("total_score"),  dpg.get_value("max_combo"),  dpg.get_value("perfect_combo"), None, self.get_mods(), utils.date2windows_ticks(date_time), lifebar, output=output_path)
 
     def clipboard_copy_CLI_command(self):
         pyperclip.copy(self.generate_CLI_command())
 
-    def update_info(self):
-        if not self.attr_check_info():
-            return False
+    def get_mods(self):
+        mods = 0
+        for mod in utils.mods_list():
+            if dpg.get_value(f"mod_{mod}") is True:
+                mods += Mod[mod].value
+        return mods
 
-        n300, n100, n50, nmiss, n_geki, n_katu, max_combo = int(self.values["-ATTR_N300-"]), int(self.values["-ATTR_N100-"]), int(self.values["-ATTR_N50-"]), int(self.values["-ATTR_NMISSES-"]), int(self.values["-ATTR_NGEKIS-"]), int(self.values["-ATTR_NKATUS-"]), int(self.values["-ATTR_MAX_COMBO-"])
-
-        acc = calculation.calculate_acc(n300, n100, n50, nmiss)
-        self.window["-INFO_ACCURACY-"].update(f"{str(acc)}%")
-
-        if self.replay is not None:
-            beatmap = self.osu_db.get_beatmap_from_hash(self.replay.beatmap_hash)
-            beatmap_path = str(Path(CONFIG.get("osu_path")) / "songs" / beatmap.folder_name / beatmap.osu_file)
-            pp = calculation.calculate_pp(beatmap_path, mode=self.replay.mode, mods=self.attr_get_mods(), n_geki=n_geki, n_katu=n_katu, n300=n300, n100=n100, n50=n50, n_misses=nmiss, combo=max_combo)
-
-            self.window["-INFO_PP-"].update(f"{str(pp)}pp")
-
-        self.window["-CLI_COMMAND-"].update(self.generate_CLI_command())
-
-        if self.replay is not None and self.values["-ATTR_TIMESTAMP_DATE-"] == "":
-            self.values["-ATTR_TIMESTAMP_DATE-"] = self.replay.timestamp.strftime("%d/%m/%Y")
-        elif self.values["-ATTR_TIMESTAMP_DATE-"] == "":
-            self.values["-ATTR_TIMESTAMP_DATE-"] = datetime.today().strftime("%d/%m/%Y")
-
-        self.window["-ATTR_TIMESTAMP_DATE-"].update(self.values["-ATTR_TIMESTAMP_DATE-"])
-
-        return True
-
-    def switch_layout(self, layout):
-        if self.current_layout == layout:
+    def save_replay(self, path=None):
+        if self.replay is None:
+            self.show_error("Please, open replay before saving")
             return
-        self.window[self.current_layout].update(visible=False)
-        self.window[layout].update(visible=True)
-
-        self.current_layout = layout
-
-    def save_replay(self):
-        if not self.attr_check_info():
-            return
-
-        if self.replay_path is None:
-            self.show_error("Please, open replay first")
-            return
-
-        os.system(self.generate_CLI_command(self.replay_path))
+        if path is None:
+            path = self.replay_path
+        print(self.generate_CLI_command(path))
+        os.system(self.generate_CLI_command(path))
 
     def save_as_replay(self):
-        if not self.attr_check_info():
+        if self.replay is None:
+            self.show_error("Please, open replay before saving")
             return
 
-        if self.replay_path is None:
-            self.show_error("Please, open replay first")
+        dpg.show_item("save_file_dialog")
+
+    def show_error(self, error_text):
+        dpg.set_value("error_text", error_text)
+        dpg.set_item_pos("error_popup", ((dpg.get_viewport_client_width() - dpg.get_item_width("error_popup")) / 2, (dpg.get_viewport_height() - dpg.get_item_height("error_popup")) / 2))
+        dpg.configure_item("error_popup", show=True)
+
+    def open_replay(self, path):
+        if path is None:
             return
+        self.replay_path = path
+        self.replay = Replay.from_path(path)
+        self.load_from_replay()
+        self.update_info_window()
 
-        path = psg.popup_get_file("Save as...", save_as=True, no_window=True, file_types=(("Osr file", "*.osr"), ("All files", "*.*")))
-        if path != "":
-            os.system(self.generate_CLI_command(path))
-
-    def open_replay(self):
-        path = psg.popup_get_file("Open file...", no_window=True, file_types=(("Osr file", "*.osr"), ("All files", "*.*")))
-        if path != "":
-            self.replay_path = path
-            self.replay = Replay.from_path(path)
-            self.load_info(self.replay)
-
-    def load_info(self, replay: Replay):
-        self.window["-ATTR_USERNAME-"].update(f"{replay.username}")
-        self.window["-ATTR_N300-"].update(f"{replay.count_300}")
-        self.window["-ATTR_N100-"].update(f"{replay.count_100}")
-        self.window["-ATTR_N50-"].update(f"{replay.count_50}")
-        self.window["-ATTR_NGEKIS-"].update(f"{replay.count_geki}")
-        self.window["-ATTR_NKATUS-"].update(f"{replay.count_katu}")
-        self.window["-ATTR_NMISSES-"].update(f"{replay.count_miss}")
-        self.window["-ATTR_TOTAL_SCORE-"].update(f"{replay.score}")
-        self.window["-ATTR_MAX_COMBO-"].update(f"{replay.max_combo}")
-        self.window["-PFC-"].update(replay.perfect)
-
-        self.values["-ATTR_TIMESTAMP_HOUR-"] = replay.timestamp.strftime("%H")
-        self.values["-ATTR_TIMESTAMP_MINUTE-"] = replay.timestamp.strftime("%M")
-        self.values["-ATTR_TIMESTAMP_SECOND-"] = replay.timestamp.strftime("%S")
+    def load_from_replay(self):
+        dpg.set_value("username", self.replay.username)
+        dpg.set_value("300s", self.replay.count_300)
+        dpg.set_value("100s", self.replay.count_100)
+        dpg.set_value("50s", self.replay.count_50)
+        dpg.set_value("gekis", self.replay.count_geki)
+        dpg.set_value("katus", self.replay.count_katu)
+        dpg.set_value("misses", self.replay.count_miss)
+        dpg.set_value("total_score", self.replay.score)
+        dpg.set_value("max_combo", self.replay.max_combo)
+        dpg.set_value("perfect_combo", self.replay.perfect)
+        dpg.set_value("date", {"month_day": self.replay.timestamp.day, "year": self.replay.timestamp.year-2000 + 100, "month": self.replay.timestamp.month})
+        dpg.set_value("time", {"hour": self.replay.timestamp.hour, "min": self.replay.timestamp.minute, "sec": self.replay.timestamp.second})
 
         for mod in utils.mods_list():
-            self.window[f"-ATTR_MOD_{mod.upper()}-"].update(True if Mod(utils.mods2code([mod])) in self.replay.mods else False)
+            dpg.set_value(f"mod_{mod}", Mod[mod] in self.replay.mods)
 
-        beatmap = self.osu_db.get_beatmap_from_hash(replay.beatmap_hash)
+        lifebar = utils.decrease_lifebar_length(self.replay.life_bar_graph)
+        self.lifebar_graph_dict.clear()
+        for index, x, y in zip(range(len(lifebar)), [life_state.time for life_state in lifebar], [life_state.life for life_state in lifebar]):
+            dpg.delete_item(f"point_{index}")
+            self.change_lifebar_dict(f"point_{index}", x, y)
+            dpg.add_drag_point(parent="life_graph", default_value=(x, y), label=index, tag=f"point_{index}", callback=lambda x, y: self.change_lifebar_dict(dpg.get_item_alias(x), dpg.get_value(x)[0], dpg.get_value(x)[1]))
+        dpg.set_axis_limits("x_axis", 0, x)
 
-        self.life_graph_data = ([x.time for x in self.replay.life_bar_graph], [x.life * 100 for x in self.replay.life_bar_graph])
+    def change_lifebar_dict(self, label, x, y):
+        self.lifebar_graph_dict[label] = {"x": x, "y": y}
 
-        self.life_axes.set_xlim(0, self.life_graph_data[0][-1:][0])
-        self.life_update_graph()
-
-        self.window["-INFO_BEATMAP-"].update(f"{beatmap.artist} // {beatmap.mapper} - {beatmap.title}")
+        dpg.delete_item("life_graph_line")
+        dpg.draw_polyline([[value.get("x"), value.get("y")] for value in self.lifebar_graph_dict.values()], thickness=2, tag="life_graph_line", parent="life_graph")
 
 
 if __name__ == "__main__":
-    app = MainWindow()
-
-    app._start()
+    try:
+        app = MainWindow()
+    except Exception as e:
+        print(e)
+    finally:
+        # dpg.save_init_file("dpg.ini")
+        pass

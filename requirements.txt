@@ -4,4 +4,4 @@ pyosudb
 pyyaml
 pyperclip
 aenum
-matplotlib
+dearpygui

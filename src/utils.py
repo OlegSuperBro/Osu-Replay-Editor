@@ -1,10 +1,11 @@
 import datetime
-import asyncio
 import numpy as np
 from aenum import IntFlag, Enum
 from pathlib import Path
 from osrparse.utils import LifeBarState
 from typing import List
+
+import osrparse
 
 
 class GameMode(Enum):
@@ -55,18 +56,6 @@ class Mod(IntFlag):
     Mirror = 1 << 30
 
 
-VALUES_LIMITS = {
-    "-GAME_VER-": range(0, 2147483647),
-    "-N300-": range(0, 65535),
-    "-N100-": range(0, 65535),
-    "-N50-": range(0, 65535),
-    "-NGEKIS-": range(0, 65535),
-    "-NKATUS-": range(0, 65535),
-    "-NMISSES-": range(0, 65535),
-    "-TOTAL_SCORE-": range(0, 2147483647),
-    "-MAX_COMBO-": range(0, 65535),
-}
-
 CLI_START_COMMAND = f"py \"{Path(__file__).parent}\\CLI.py\""
 
 
@@ -74,19 +63,6 @@ def mods_list() -> list[str]:
     mod_list = list(map(lambda c: c.name, Mod))
     mod_list.remove("Target")  # it will break replay
     return mod_list
-
-
-def check_limit(name: str, value: any) -> tuple[bool, int]:
-    limit = VALUES_LIMITS.get(name)
-    if limit is None:
-        return (True, VALUES_LIMITS.get(name))
-
-    if not (is_int(value)):
-        return (False, VALUES_LIMITS.get(name))
-    if not (VALUES_LIMITS.get(name).start <= int(value) <= VALUES_LIMITS.get(name).stop):
-        return (False, VALUES_LIMITS.get(name))
-
-    return (True, VALUES_LIMITS.get(name))
 
 
 def code2gamemode(code: int) -> str:
@@ -135,7 +111,7 @@ def is_int(value: any):
 
 
 def lifebar2str(lifebar: List[LifeBarState]):
-    return ",".join([f"{state.time}|{state.life}" for state in lifebar])
+    return ",".join([f"{state.time}|{state.life}" for state in lifebar])[:-1]
 
 
 def generate_command(input_path: str = None, nickname: str = None, n300: int = None, n100: int = None, n50: int = None, ngekis: int = None, nkatus: int = None, nmisses: int = None,
@@ -196,13 +172,6 @@ def generate_command(input_path: str = None, nickname: str = None, n300: int = N
     return command
 
 
-def run_async(func):
-    def wrapper(*args, **kwargs):
-        return asyncio.get_event_loop().run_in_executor(None, func, *args, **kwargs)
-
-    return wrapper
-
-
 def dist_point_to_segment(p, s0, s1):
     """
     Get the distance from the point *p* to the segment (*s0*, *s1*), where
@@ -215,3 +184,17 @@ def dist_point_to_segment(p, s0, s1):
     # Project onto segment, without going past segment ends.
     p1 = s0 + np.clip((s0p @ s01) / (s01 @ s01), 0, 1) * s01
     return np.hypot(*(p - p1))
+
+
+def decrease_lifebar_length(lifebar: List[LifeBarState]):
+    new_lifebar = []
+    for index in range(len(lifebar)):
+        if index == 0 or index >= len(lifebar) - 1:
+            print(True)
+            new_lifebar.append(lifebar[index])
+            continue
+
+        if lifebar[index].life != lifebar[index + 1].life or lifebar[index].life != lifebar[index - 1].life:
+            new_lifebar.append(lifebar[index])
+
+    return new_lifebar

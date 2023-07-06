@@ -1,5 +1,13 @@
 # Changelog
 
+## 2023.7.6.0
+
+### Added
+- Replays lifebar data is now smaller
+### Changed
+
+- Now using DearPyGUI instead PySimpleGui
+
 ## 2023.7.2.0
 
 ### Added
