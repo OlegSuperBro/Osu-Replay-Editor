@@ -17,6 +17,25 @@
 - CLI:
   - [X] Make it as separated file (remove main.py)
 
-- calculations:
+- Calculations:
   - [X] Calculate acc
   - [X] Calculate pp
+
+- Rendering:
+  - [ ] Skin support
+  - [ ] Rendering objects:
+    - [X] Circles
+    - [ ] Sliders
+    - [ ] Spiners
+  - [ ] Apply mods:
+    - [X] AR
+    - [ ] CS
+    - [ ] OD
+  - [ ] Replay over beatmap:
+    - [ ] Cursor
+    - [ ] Presses
+
+  - Issues:
+    - [ ] Notes fading out
+    - [ ] Full fade in when you should press note (Fade in should be done little before before press)
+  

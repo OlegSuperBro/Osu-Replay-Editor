@@ -1,7 +1,8 @@
 osrparse
 rosu-pp-py
-pyosudb
+pyosutools
 pyyaml
 pyperclip
 aenum
 dearpygui
+pillow

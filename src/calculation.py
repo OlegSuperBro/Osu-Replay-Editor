@@ -1,7 +1,7 @@
 from osrparse import Replay, GameMode, Mod
 from rosu_pp_py import Beatmap, Calculator
 from pathlib import Path
-import pyosudb
+from pyosutools.db.osu import parse_osudb
 
 from config import CONFIG
 
@@ -27,7 +27,7 @@ def calculate_pp(beatmap_path: str, mode: GameMode = 0, mods: Mod = Mod(0),
 
 
 def replay_calculate_pp(replay: Replay):
-    db = pyosudb.parse_osudb(Path(CONFIG.get("osu_path")) / "osu!.db")
+    db = parse_osudb(Path(CONFIG.get("osu_path")) / "osu!.db")
     beatmap = db.get_beatmap_from_hash(replay.beatmap_hash)
     beatmap_path = str(Path(CONFIG.get("osu_path")) / "songs" / beatmap.folder_name / beatmap.osu_file)
     return calculate_pp(beatmap_path, mode=replay.mode, mods=replay.mods,

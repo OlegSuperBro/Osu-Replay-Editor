@@ -3,12 +3,13 @@ import os
 import datetime
 import pyperclip
 from math import ceil
-from pyosudb import parse_osudb
+from pyosutools.db.osu import parse_osudb
 from pathlib import Path
-from osrparse import Replay, Mod
+from osrparse import Replay
 from osrparse.utils import LifeBarState
 
 import utils
+from utils import Mod
 import calculation
 from config import CONFIG
 
@@ -38,7 +39,7 @@ def generate_mods_checkboxes(width, callback):
 
 class MainWindow():
     def __init__(self) -> None:
-        self.osu_db = parse_osudb(Path(CONFIG.get("osu_path")) / "osu!.db")
+        self.osu_db = parse_osudb(Path(CONFIG.get("osu_path")) / "osu!.db", sql_check_same_thread=False)
         # self.osu_db = None
         self.replay = None
         self.replay_path = None
@@ -251,7 +252,7 @@ class MainWindow():
         dpg.set_value("time", {"hour": self.replay.timestamp.hour, "min": self.replay.timestamp.minute, "sec": self.replay.timestamp.second})
 
         for mod in utils.mods_list():
-            dpg.set_value(f"mod_{mod}", Mod[mod] in self.replay.mods)
+            dpg.set_value(f"mod_{mod}", Mod[mod] in Mod(self.replay.mods))
 
         lifebar = utils.decrease_lifebar_length(self.replay.life_bar_graph)
         self.lifebar_graph_dict.clear()

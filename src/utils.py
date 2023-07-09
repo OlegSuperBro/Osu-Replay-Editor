@@ -5,8 +5,6 @@ from pathlib import Path
 from osrparse.utils import LifeBarState
 from typing import List
 
-import osrparse
-
 
 class GameMode(Enum):
     """
