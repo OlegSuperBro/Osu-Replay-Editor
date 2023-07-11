@@ -1,9 +1,10 @@
 import argparse
+import glob
+import sys
 from osrparse import Replay, Mod
 from osrparse.utils import LifeBarState
 from os.path import isdir, join, exists
 from os import mkdir
-import glob
 
 import utils
 
@@ -45,7 +46,7 @@ def show_replay_info(replay: Replay):
                               score=replay.score,
                               combo=replay.max_combo,
                               pfc=replay.perfect,
-                              mods=", ".join([utils.code2mods(replay.mods)]),
+                              mods=", ".join(utils.code2mods(replay.mods)),
                               date=replay.timestamp,
                               score_id=replay.replay_id))
 
@@ -84,7 +85,7 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def CLI_run():
     args = get_parser().parse_args()
 
     replays = []
@@ -96,7 +97,11 @@ if __name__ == "__main__":
             replays.append(tmp_replay)
 
     else:
-        tmp_replay = Replay.from_path(args.path)
+        try:
+            tmp_replay = Replay.from_path(args.path)
+        except FileNotFoundError:
+            print("File not found. Please make sure path is correct or replay exists")
+            sys.exit()
         tmp_replay.path = args.path
         replays.append(tmp_replay)
 
@@ -176,3 +181,7 @@ if __name__ == "__main__":
 
             for index, replay in enumerate(replays):
                 replay.write_path(join(args.output, f"{index}.osr"))
+
+
+if __name__ == "__main__":
+    CLI_run()
