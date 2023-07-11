@@ -188,7 +188,6 @@ def decrease_lifebar_length(lifebar: List[LifeBarState]):
     new_lifebar = []
     for index in range(len(lifebar)):
         if index == 0 or index >= len(lifebar) - 1:
-            print(True)
             new_lifebar.append(lifebar[index])
             continue
 

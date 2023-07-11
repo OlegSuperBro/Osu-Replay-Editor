@@ -9,7 +9,9 @@
 
   - [X] Show info in real time
   - [ ] Drag and drop (impossible in pysimplegui. Maybe when i'll rewrite to other GUI library)
-  - [ ] Life graph editor
+  - Life graph editor:
+    - [X] Graph editor
+    - [ ] Add/Remove points
   - [ ] Replay player
   - [ ] Replay data editor
   - [X] Make it work through CLI
@@ -32,6 +34,7 @@
       - [X] AR
       - [ ] CS
       - [ ] OD
+      - [ ] HR
   
   - Rendering replay:
     - [ ] Cursor
