@@ -1,5 +1,21 @@
 # Changelog
 
+# 2023.7.10.1
+
+First alpha release!
+
+### Added
+- Handling **FileNotFoundException** in CLI
+
+### Fixed
+- Trying to call ```--info``` calls **TypeError**
+
+### Changed
+- All main CLI lines now in func ```CLI_run```
+
+### Removed
+- Some debug prints in interface
+
 ## 2023.7.10.0
 
 ### Added

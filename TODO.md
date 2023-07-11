@@ -2,7 +2,7 @@
 
 - Interface:
   - [X] Add timestamp selector
-  - [X] Show info on another tab:
+  - Show info on another tab:
     - [X] Beatmap name
     - [X] Accuracy
     - [X] PP
@@ -21,21 +21,29 @@
   - [X] Calculate acc
   - [X] Calculate pp
 
-- Rendering:
-  - [ ] Skin support
-  - [ ] Rendering objects:
-    - [X] Circles
-    - [ ] Sliders
-    - [ ] Spiners
-  - [ ] Apply mods:
-    - [X] AR
-    - [ ] CS
-    - [ ] OD
-  - [ ] Replay over beatmap:
+- Replay player:
+  - Rendering beatmap:
+    - [ ] Skin support
+    - [ ] Rendering objects:
+      - [X] Circles
+      - [ ] Sliders
+      - [ ] Spiners
+    - Apply mods:
+      - [X] AR
+      - [ ] CS
+      - [ ] OD
+  
+  - Rendering replay:
     - [ ] Cursor
     - [ ] Presses
+  
+  - Timeline:
+    - [ ] Scrolling through replay
+    - [ ] Show misses, 50s etc (maybe like in [Rewind](https://github.com/abstrakt8/rewind))
+  
+  - [ ] Song playing
 
   - Issues:
-    - [ ] Notes fading out
+    - [ ] Notes fades out sometimes
     - [ ] Full fade in when you should press note (Fade in should be done little before before press)
   

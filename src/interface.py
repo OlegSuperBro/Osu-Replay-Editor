@@ -193,7 +193,6 @@ class MainWindow():
         time = dpg.get_value("time")
         date_time = datetime.datetime.strptime(f'{date.get("year") - 100 + 2000}/{date.get("month")}/{date.get("month_day")} {time.get("hour")}:{time.get("min")}:{time.get("sec")}', "%Y/%m/%d %H:%M:%S")
         lifebar = utils.lifebar2str([LifeBarState(int(state.get("x")), round(state.get("y"), 2)) for state in self.lifebar_graph_dict.values()]) if self.replay is not None else None
-        print(self.lifebar_graph_dict, lifebar)
         return utils.generate_command(self.replay_path,
                                       dpg.get_value("username"), dpg.get_value("300s"), dpg.get_value("100s"), dpg.get_value("50s"), dpg.get_value("gekis"), dpg.get_value("katus"), dpg.get_value("misses"),
                                       dpg.get_value("total_score"),  dpg.get_value("max_combo"),  dpg.get_value("perfect_combo"), None, self.get_mods(), utils.date2windows_ticks(date_time), lifebar, output=output_path)
@@ -214,7 +213,6 @@ class MainWindow():
             return
         if path is None:
             path = self.replay_path
-        print(self.generate_CLI_command(path))
         os.system(self.generate_CLI_command(path))
 
     def save_as_replay(self):

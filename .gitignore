@@ -1,3 +1,7 @@
 .venv/
 __pycache__/
 *.code-workspace
+
+dist/
+build
+*.spec
