@@ -1,7 +1,8 @@
 import dearpygui.dearpygui as dpg
 import sys
+import traceback
 
-from interface import MainWindow
+from gui import MainWindow
 from CLI import CLI_run
 
 if __name__ == "__main__":
@@ -10,7 +11,10 @@ if __name__ == "__main__":
     else:
         try:
             MainWindow()
+        except KeyboardInterrupt:
+            pass
         except Exception as e:
-            print(e)
+            traceback.print_exc()
         finally:
-            dpg.save_init_file("dpg.ini")
+            # dpg.save_init_file("dpg.ini")
+            pass

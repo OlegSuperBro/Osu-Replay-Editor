@@ -184,7 +184,7 @@ def dist_point_to_segment(p, s0, s1):
     return np.hypot(*(p - p1))
 
 
-def decrease_lifebar_length(lifebar: List[LifeBarState]):
+def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:
     new_lifebar = []
     for index in range(len(lifebar)):
         if index == 0 or index >= len(lifebar) - 1:
