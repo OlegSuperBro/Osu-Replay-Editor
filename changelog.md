@@ -1,6 +1,6 @@
 # Changelog
 
-# 2023.7.12.0
+# 2023.7.15.0
 
 ### Added
 - Quering for life graph, for easier editing
