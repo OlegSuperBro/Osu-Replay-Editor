@@ -32,10 +32,10 @@ def generate_mods_checkboxes(width, callback):
 
 class AttributesWindow:
     def __init__(self, callback) -> None:
-        self._build(callback)
+        self._id = self._build(callback)
 
     def _build(self, callback) -> None:
-        with dpg.window(label="Attributes", pos=(0, 20), min_size=(650, 100), tag="attr_window", on_close=lambda sender: None if sender != "attr_window" else dpg.delete_item("attr_window")):
+        with dpg.window(label="Attributes", pos=(0, 20), min_size=(650, 100), tag="attr_window", on_close=lambda sender: None if sender != "attr_window" else dpg.hide_item("attr_window")) as _id:
             with dpg.group(horizontal=True):
                 with dpg.group():
                     dpg.add_text("Player")
@@ -68,6 +68,7 @@ class AttributesWindow:
                     dpg.add_spacer(height=5)
                     with dpg.tree_node(label="Mods"):
                         generate_mods_checkboxes(5, callback)
+            return _id
 
     def load_from_replay(self, replay: Replay):
         dpg.set_value("username", replay.username)
@@ -86,7 +87,7 @@ class AttributesWindow:
         for mod in utils.mods_list():
             dpg.set_value(f"mod_{mod}", Mod[mod] in Mod(replay.mods))
 
-    def read_in_replay(self, replay: Replay):
+    def read_in_replay(self, replay: Replay) -> None:
         replay.username = dpg.get_value("username")
         replay.count_300 = dpg.get_value("300s")
         replay.count_100 = dpg.get_value("100s")

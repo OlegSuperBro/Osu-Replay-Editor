@@ -7,13 +7,14 @@ import utils
 
 class CliCommandWindow:
     def __init__(self) -> None:
-        self._build()
+        self._id = self._build()
 
     def _build(self) -> None:
-        with dpg.window(label="CLI command", pos=(0, 807), width=650, min_size=(400, 50), no_scrollbar=True, max_size=(30000, 50), tag="CLI_window", on_close=lambda: dpg.delete_item("CLI_window")):
+        with dpg.window(label="CLI command", pos=(0, 807), width=650, min_size=(400, 50), no_scrollbar=True, max_size=(30000, 50), tag="CLI_window", on_close=lambda: dpg.hide_item("CLI_window")) as _id:
             with dpg.group(horizontal=True):
                 dpg.add_input_text(width=-135, readonly=True, tag="cli_command")
                 dpg.add_button(label="Copy to clipboard", callback=self.clipboard_copy_CLI_command)
+            return _id
 
     def update(self, replay: Replay) -> None:
         dpg.set_value("cli_command", self.generate_CLI_command(replay))

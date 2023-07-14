@@ -1,5 +1,18 @@
 # Changelog
 
+# 2023.7.12.0
+
+### Added
+- Quering for life graph, for easier editing
+- Config class
+- Adding new point to life graph
+
+### Changed
+- Life graph now have same size as osu!
+- Two graphs, first for viewing, second for editing
+- Interface now is separated
+- Windows now hiding, not closing
+
 # 2023.7.10.1
 
 First alpha release!

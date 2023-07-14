@@ -9,10 +9,10 @@ from config import CONFIG
 
 class InformationWindow:
     def __init__(self) -> None:
-        self._build()
+        self._id = self._build()
 
-    def _build(self) -> None:
-        with dpg.window(label="Replay Information", pos=(650, 20), width=835, min_size=(250, 250), tag="info_window", on_close=lambda: dpg.delete_item("info_window")):
+    def _build(self) -> int:
+        with dpg.window(label="Replay Information", pos=(650, 20), width=835, min_size=(250, 250), tag="info_window", on_close=lambda: dpg.hide_item("info_window")) as _id:
             with dpg.group(horizontal=True):
                 with dpg.group():
                     dpg.add_text("Beatmap name")
@@ -23,6 +23,7 @@ class InformationWindow:
                     dpg.add_text(tag="beatmap_name")
                     dpg.add_text(tag="total_accuracy")
                     dpg.add_text(tag="total_pp")
+            return _id
 
     def update(self, osu_db: Osudb, replay: Replay = None):
         acc = calculation.calculate_acc(replay.count_300, replay.count_100, replay.count_50, replay.count_miss)

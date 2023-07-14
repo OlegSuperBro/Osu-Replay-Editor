@@ -8,13 +8,15 @@
     - [X] PP
 
   - [X] Show info in real time
-  - [ ] Drag and drop (impossible in pysimplegui. Maybe when i'll rewrite to other GUI library)
+  - [ ] Drag and drop
   - Life graph editor:
     - [X] Graph editor
     - [ ] Add/Remove points
   - [ ] Replay player
   - [ ] Replay data editor
   - [X] Make it work through CLI
+  - [ ] List with multiple replays
+  - [ ] Cache for osu db parsing
 
 - CLI:
   - [X] Make it as separated file (remove main.py)

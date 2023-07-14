@@ -63,6 +63,7 @@ class MainWindow():
 
     def build_attr(self):
         if dpg.does_item_exist("attr_window"):
+            dpg.show_item(self.attr_window._id)
             dpg.focus_item("attr_window")
             return
 
@@ -70,20 +71,26 @@ class MainWindow():
 
     def build_life(self):
         if dpg.does_item_exist("life_window"):
+            dpg.show_item(self.life_window._id)
             dpg.focus_item("life_window")
             return
+
         self.life_window = LifeBarGraphWindow()
 
     def build_CLI(self):
         if dpg.does_item_exist("CLI_window"):
+            dpg.show_item(self.cli_window._id)
             dpg.focus_item("CLI_command")
             return
+
         self.cli_window = CliCommandWindow()
 
     def build_info(self):
         if dpg.does_item_exist("info_window"):
+            dpg.show_item(self.info_window._id)
             dpg.focus_item("info_window")
             return
+
         self.info_window = InformationWindow()
 
     def on_update(self):
@@ -98,6 +105,9 @@ class MainWindow():
             return
         if path is None:
             path = self.replay_path
+
+        self.attr_window.read_in_replay(self.curr_replay)
+        self.life_window.read_in_replay(self.curr_replay)
 
         self.curr_replay.write_path(path)
 
