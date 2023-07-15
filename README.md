@@ -1,3 +1,5 @@
+# THIS VERSION IS OUTDATED AND WILL NOT BE UPDATED. SWTICH TO MAIN BRANCH TO GET LATEST VERSION
+
 # Osu-Replay-Editor
 
 This thing let you edit .osr files (osu! replays)
