@@ -1,19 +1,18 @@
 import dearpygui.dearpygui as dpg
 import os
 from datetime import datetime
-from pyosutools.db.osu import parse_osudb
 from pathlib import Path
 from osrparse import Replay
 from osrparse.utils import GameMode, Mod
 
 from config import CONFIG
+from utils import get_osu_db_cached
 from gui.dpg_windows import InformationWindow, CliCommandWindow, LifeBarGraphWindow, AttributesWindow
 
 
 class MainWindow():
     def __init__(self) -> None:
-        self.osu_db = parse_osudb(Path(CONFIG.osu_path) / "osu!.db", sql_check_same_thread=False)
-        # self.osu_db = None
+        self.osu_db = get_osu_db_cached(Path(CONFIG.osu_path) / "osu!.db")
         self.orig_replays = []
         self.curr_replay = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
         self.replay_path = None

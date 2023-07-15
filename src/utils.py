@@ -2,8 +2,11 @@ import datetime
 import numpy as np
 from aenum import IntFlag, Enum
 from pathlib import Path
+from os import mkdir
+from os.path import dirname, exists, isdir
 from osrparse.utils import LifeBarState
 from typing import List
+from pyosutools.db.osu import Osudb, parse_osudb
 
 
 class GameMode(Enum):
@@ -195,3 +198,10 @@ def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:
             new_lifebar.append(lifebar[index])
 
     return new_lifebar
+
+
+def get_osu_db_cached(db_path) -> Osudb:
+    cache_path = Path(dirname(__file__)) / "cache" / "beatmaps_cache.db"
+    if not isdir(dirname(cache_path)):
+        mkdir(dirname(cache_path))
+    parse_osudb(db_path, cache_path, exists(cache_path), sql_check_same_thread=False)
