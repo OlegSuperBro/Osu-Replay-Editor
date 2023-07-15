@@ -204,4 +204,4 @@ def get_osu_db_cached(db_path) -> Osudb:
     cache_path = Path(dirname(__file__)) / "cache" / "beatmaps_cache.db"
     if not isdir(dirname(cache_path)):
         mkdir(dirname(cache_path))
-    parse_osudb(db_path, cache_path, exists(cache_path), sql_check_same_thread=False)
+    return parse_osudb(db_path, cache_path, exists(cache_path), sql_check_same_thread=False)
