@@ -75,7 +75,7 @@ def gamemode2code(mode: str) -> int:
 
 
 def mods2code(mods: list[str]) -> int:
-    if len(mods) == 0:
+    if not mods:
         return 0
     return Mod["|".join(mods)].value
 

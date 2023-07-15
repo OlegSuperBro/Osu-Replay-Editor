@@ -118,7 +118,7 @@ class MainWindow():
         self.curr_replay.write_path(path)
 
         self.replay_path = path
-        dpg.set_viewport_title(self.default_title + " " + self.replay_path)
+        dpg.set_viewport_title(f"{self.default_title} {self.replay_path}")
 
     def show_error(self, error_text):
         dpg.set_value("error_text", error_text)
@@ -140,7 +140,7 @@ class MainWindow():
         self.info_window.update_on_load(self.osu_db, self.curr_replay)
         self.cli_window.update_on_load(self.curr_replay)
 
-        dpg.set_viewport_title(self.default_title + " " + self.replay_path)
+        dpg.set_viewport_title(f"{self.default_title} {self.replay_path}")
 
     def load_from_replay(self):
         self.attr_window.load_from_replay(self.curr_replay)

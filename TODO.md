@@ -17,7 +17,6 @@
       - [ ] Generate from replay data
   - [ ] Replay player
   - [ ] Replay data editor
-  - [X] Make it work through CLI
   - [ ] List with multiple replays
   - [X] Cache for osu db parsing
   - Preview:

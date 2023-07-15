@@ -1,5 +1,19 @@
 # Changelog
 
+# WIP
+
+### Added
+- Title now have path to current replay
+- Caching for loading osu.db file
+- Deleting points
+
+### Changed
+- Saving replay will change working replay path to saved
+
+### Fixed
+- Opening corrupted replay "crashes" program
+- Don't allow save empty replay
+
 # 2023.7.15.0
 
 ### Added
@@ -25,6 +39,7 @@ First alpha release!
 
 ### Changed
 - All main CLI lines now in func ```CLI_run```
+- Now using default windows file dialog
 
 ### Removed
 - Some debug prints in interface

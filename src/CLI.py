@@ -145,7 +145,7 @@ def CLI_run():
 
     if args.pfc is not None:
         for replay in replays:
-            replay.perfect = True if args.pfc == "True" else False
+            replay.perfect = args.pfc == "True"
 
     if args.mods is not None:
         for replay in replays:
@@ -161,7 +161,7 @@ def CLI_run():
 
     if args.info:
         for replay in replays:
-            print("Replay: " + replay.path)
+            print(f"Replay: {replay.path}")
             show_replay_info(replay)
 
     if args.lifebar:
@@ -169,12 +169,10 @@ def CLI_run():
             replay.life_bar_graph = [LifeBarState(int(life_dot.split("|")[0]), float(life_dot.split("|")[1])) for life_dot in args.lifebar.split(",")]
 
     if args.output is not None:
-        # if only 1 replay given
         if len(replays) == 1:
             replays[0].write_path(args.output)
             exit()
 
-        # if more than 1 replay given, create directory
         else:
             if not exists(args.output):
                 mkdir(args.output)
