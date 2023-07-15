@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from osrparse import Replay
 from osrparse.utils import GameMode, Mod
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from config import CONFIG
 from utils import get_osu_db_cached
@@ -34,9 +35,9 @@ class MainWindow():
     def build_window(self):
         with dpg.viewport_menu_bar():
             with dpg.menu(label="File"):
-                dpg.add_menu_item(label="Open", callback=lambda: dpg.configure_item("open_file_dialog", show=True))
+                dpg.add_menu_item(label="Open", callback=lambda: self.open_replay(askopenfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path + "\\Replays")))
                 dpg.add_menu_item(label="Save", callback=lambda: self.save_replay(self.replay_path))
-                dpg.add_menu_item(label="Save as...", callback=lambda: self.save_as_replay())
+                dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(asksaveasfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path, initialfile="replay")))
             with dpg.menu(label="View"):
                 with dpg.menu(label="Show"):
                     dpg.add_menu_item(label="Attributes editor", callback=self.build_attr)
@@ -48,14 +49,6 @@ class MainWindow():
         with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
             dpg.add_text("", tag="error_text")
             dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item("error_popup", show=False))
-
-        with dpg.file_dialog(directory_selector=False, tag="save_file_dialog", min_size=(250, 250), default_filename="replay", default_path=Path(CONFIG.osu_path) / "Replays", show=False, callback=(lambda x, y: [self.save_replay(list(y.values())[0]), dpg.configure_item("save_file_dialog", show=False)]), cancel_callback=lambda x, y: dpg.configure_item("save_file_dialog", show=False)):
-            dpg.add_file_extension(".osr")
-            dpg.add_file_extension("")
-
-        with dpg.file_dialog(directory_selector=False, tag="open_file_dialog", min_size=(250, 250), default_path=Path(CONFIG.osu_path) / "Replays", show=False, callback=(lambda x, y: [self.open_replay(list(y.values())[0]), dpg.configure_item("open_file_dialog", show=False)]), cancel_callback=lambda x, y: dpg.configure_item("open_file_dialog", show=False)):
-            dpg.add_file_extension(".osr")
-            dpg.add_file_extension("")
 
         self.build_attr()
         self.build_life()
@@ -106,6 +99,9 @@ class MainWindow():
             return
         if path is None:
             path = self.replay_path
+        elif path == "":
+            self.show_error("Please, select a file")
+            return
 
         self.attr_window.read_in_replay(self.curr_replay)
         self.life_window.read_in_replay(self.curr_replay)
@@ -115,20 +111,13 @@ class MainWindow():
         self.replay_path = path
         dpg.set_viewport_title(self.default_title + " " + self.replay_path)
 
-    def save_as_replay(self):
-        if self.curr_replay.game_version == 0:
-            self.show_error("Please, open replay before saving")
-            return
-
-        dpg.show_item("save_file_dialog")
-
     def show_error(self, error_text):
         dpg.set_value("error_text", error_text)
         dpg.set_item_pos("error_popup", ((dpg.get_viewport_client_width() - dpg.get_item_width("error_popup")) / 2, (dpg.get_viewport_height() - dpg.get_item_height("error_popup")) / 2))
         dpg.configure_item("error_popup", show=True)
 
     def open_replay(self, path):
-        if path is None:
+        if path == "":
             return
         try:
             replay = Replay.from_path(path)
