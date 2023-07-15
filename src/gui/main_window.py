@@ -14,11 +14,17 @@ from gui.dpg_windows import InformationWindow, CliCommandWindow, LifeBarGraphWin
 class MainWindow():
     default_title = "Replay Editor"
 
-    def __init__(self) -> None:
+    def __init__(self, replay: str = None) -> None:
         self.osu_db = get_osu_db_cached(Path(CONFIG.osu_path) / "osu!.db")
-        self.orig_replays = []
         self.curr_replay = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
         self.replay_path = None
+
+        if replay is not None:
+            try:
+                self.curr_replay = Replay.from_path(replay)
+                self.replay_path = replay
+            except Exception as e:
+                print(e)
 
         dpg.create_context()
         if os.path.exists("dpg.ini"):
@@ -26,6 +32,9 @@ class MainWindow():
         dpg.create_viewport(title=self.default_title, width=1500, height=900)
 
         self.build_window()
+
+        if self.replay_path is not None:
+            self.open_replay(self.replay_path)
 
         dpg.setup_dearpygui()
         dpg.show_viewport()
@@ -125,7 +134,6 @@ class MainWindow():
             self.show_error(f"Error occured: \n\n{e} \n\nPossibly, replay is corrupted")
             return
         self.replay_path = path
-        self.orig_replays.append(replay)
         self.curr_replay = replay
         self.load_from_replay()
 
