@@ -17,5 +17,4 @@ if __name__ == "__main__":
             traceback.print_exc()
             input("Press ENTER to continue")
         finally:
-            # dpg.save_init_file("dpg.ini")
-            pass
+            dpg.save_init_file("dpg.ini")
