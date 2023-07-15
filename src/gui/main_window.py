@@ -11,6 +11,8 @@ from gui.dpg_windows import InformationWindow, CliCommandWindow, LifeBarGraphWin
 
 
 class MainWindow():
+    default_title = "Replay Editor"
+
     def __init__(self) -> None:
         self.osu_db = get_osu_db_cached(Path(CONFIG.osu_path) / "osu!.db")
         self.orig_replays = []
@@ -20,7 +22,7 @@ class MainWindow():
         dpg.create_context()
         if os.path.exists("dpg.ini"):
             dpg.configure_app(init_file="dpg.ini")
-        dpg.create_viewport(title='Replay Editor', width=1500, height=900)
+        dpg.create_viewport(title=self.default_title, width=1500, height=900)
 
         self.build_window()
 
@@ -43,7 +45,7 @@ class MainWindow():
                     dpg.add_menu_item(label="Replay information", callback=self.build_info)
                     dpg.add_menu_item(label="CLI command", callback=self.build_CLI)
 
-        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=250, height=100):
+        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
             dpg.add_text("", tag="error_text")
             dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item("error_popup", show=False))
 
@@ -110,6 +112,9 @@ class MainWindow():
 
         self.curr_replay.write_path(path)
 
+        self.replay_path = path
+        dpg.set_viewport_title(self.default_title + " " + self.replay_path)
+
     def save_as_replay(self):
         if self.curr_replay.game_version == 0:
             self.show_error("Please, open replay before saving")
@@ -125,14 +130,20 @@ class MainWindow():
     def open_replay(self, path):
         if path is None:
             return
+        try:
+            replay = Replay.from_path(path)
+        except Exception as e:
+            self.show_error(f"Error occured: \n\n{e} \n\nPossibly, replay is corrupted")
+            return
         self.replay_path = path
-        replay = Replay.from_path(path)
         self.orig_replays.append(replay)
         self.curr_replay = replay
         self.load_from_replay()
 
         self.info_window.update_on_load(self.osu_db, self.curr_replay)
         self.cli_window.update_on_load(self.curr_replay)
+
+        dpg.set_viewport_title(self.default_title + " " + self.replay_path)
 
     def load_from_replay(self):
         self.attr_window.load_from_replay(self.curr_replay)
