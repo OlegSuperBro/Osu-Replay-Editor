@@ -99,7 +99,7 @@ class MainWindow():
         self.cli_window.update(self.curr_replay)
 
     def save_replay(self, path=None):
-        if self.curr_replay is None:
+        if self.curr_replay.game_version == 0:
             self.show_error("Please, open replay before saving")
             return
         if path is None:
@@ -111,7 +111,7 @@ class MainWindow():
         self.curr_replay.write_path(path)
 
     def save_as_replay(self):
-        if self.curr_replay is None:
+        if self.curr_replay.game_version == 0:
             self.show_error("Please, open replay before saving")
             return
 
