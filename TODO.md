@@ -8,15 +8,21 @@
     - [X] PP
 
   - [X] Show info in real time
-  - [ ] Drag and drop
+  - [ ] Drag and drop files
   - Life graph editor:
     - [X] Graph editor
-    - [ ] Add/Remove points
+    - [X] Add/Remove points
+    - Tools:
+      - [ ] Black & white image to line art
+      - [ ] Generate from replay data
   - [ ] Replay player
   - [ ] Replay data editor
   - [X] Make it work through CLI
   - [ ] List with multiple replays
-  - [ ] Cache for osu db parsing
+  - [X] Cache for osu db parsing
+  - Preview:
+    - [ ] Life Graph preview
+    - [ ] Generate result screen
 
 - CLI:
   - [X] Make it as separated file (remove main.py)
