@@ -19,12 +19,10 @@
   - [ ] Replay data editor
   - [ ] List with multiple replays
   - [X] Cache for osu db parsing
+  - [ ] Creating replay from nothing
   - Preview:
     - [ ] Life Graph preview
     - [ ] Generate result screen
-
-- CLI:
-  - [X] Make it as separated file (remove main.py)
 
 - Calculations:
   - [X] Calculate acc
@@ -33,12 +31,13 @@
 - Replay player:
   - Rendering beatmap:
     - [ ] Skin support
+    - [ ] Animated elements support
     - [ ] Rendering objects:
-      - [X] Circles
+      - [ ] Circles
       - [ ] Sliders
       - [ ] Spiners
     - Apply mods:
-      - [X] AR
+      - [ ] AR
       - [ ] CS
       - [ ] OD
       - [ ] HR

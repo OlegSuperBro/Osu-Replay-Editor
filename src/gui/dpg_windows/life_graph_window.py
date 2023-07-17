@@ -30,7 +30,7 @@ class LifeBarGraphWindow:
         with dpg.item_handler_registry(tag="add_point_click_handler"):
             dpg.add_item_clicked_handler(dpg.mvMouseButton_Right, callback=self.rmb_callback)
 
-        with dpg.window(label="Life Graph", pos=(0, 400), min_size=(420, 400), max_size=(420, 400), tag="life_window", on_close=lambda: dpg.hide_item("life_window"), no_scrollbar=True) as _id:
+        with dpg.tab(label="Life Graph", tag="life_window") as _id:
             with dpg.plot(width=405, height=175, query=True, callback=query, tag="full_life_graph", query_button=dpg.internal_dpg.mvMouseButton_Right):
                 dpg.add_plot_axis(dpg.mvXAxis, label="Ticks", tag="full_x_axis")
                 dpg.add_plot_axis(dpg.mvYAxis, label="Life %", tag="full_y_axis")

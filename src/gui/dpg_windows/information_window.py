@@ -12,7 +12,7 @@ class InformationWindow:
         self._id = self._build()
 
     def _build(self) -> int:
-        with dpg.window(label="Replay Information", pos=(650, 20), width=835, min_size=(250, 250), tag="info_window", on_close=lambda: dpg.hide_item("info_window")) as _id:
+        with dpg.tab(label="Replay Information", tag="info_window") as _id:
             with dpg.group(horizontal=True):
                 with dpg.group():
                     dpg.add_text("Beatmap name")

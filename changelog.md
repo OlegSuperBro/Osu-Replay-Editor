@@ -14,6 +14,9 @@
 - Opening corrupted replay "crashes" program
 - Don't allow save empty replay
 
+### Removed
+- Removed CLI tool (moved to [another](https://github.com/OlegSuperBro/cli-replay-editor) repository)
+
 # 2023.7.15.0
 
 ### Added

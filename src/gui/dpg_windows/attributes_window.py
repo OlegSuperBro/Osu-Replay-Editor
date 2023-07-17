@@ -35,7 +35,7 @@ class AttributesWindow:
         self._id = self._build(callback)
 
     def _build(self, callback) -> None:
-        with dpg.window(label="Attributes", pos=(0, 20), min_size=(650, 100), tag="attr_window", on_close=lambda sender: None if sender != "attr_window" else dpg.hide_item("attr_window")) as _id:
+        with dpg.tab(label="Attributes", tag="attr_window") as _id:
             with dpg.group(horizontal=True):
                 with dpg.group():
                     dpg.add_text("Player")
