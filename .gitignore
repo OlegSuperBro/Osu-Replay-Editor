@@ -5,5 +5,7 @@ __pycache__/
 
 dist/
 build
-*.spec
 cache/
+*build.bat
+config.yaml
+traceback.txt

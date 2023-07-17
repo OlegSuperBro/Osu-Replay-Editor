@@ -6,6 +6,17 @@ from dataclasses import dataclass
 from os.path import abspath, dirname
 
 
+@dataclass
+class CONFIG:
+    osu_path: str = "C:\\Games\\osu!"
+    skin: str = "Default"
+
+    @classmethod
+    def from_dict(cls, env: dict):
+        for key, value in {k: v for k, v in env.items() if k in inspect.signature(cls).parameters}.items():
+            setattr(cls, key, value)
+
+
 class CONSTANTS:
     program_path = f"{dirname(abspath(sys.argv[0]))}"
 
@@ -16,17 +27,6 @@ class CONSTANTS:
 
     config_file = f"{program_path}\\config.yaml"
     dpg_config_file = f"{program_path}\\dearpygui.ini"
-
-
-@dataclass
-class CONFIG:
-    osu_path: str = "C:\\Games\\osu!"
-    skin: str = "Default"
-
-    @classmethod
-    def from_dict(cls, env):
-        for key, value in {k: v for k, v in env.items() if k in inspect.signature(cls).parameters}.items():
-            setattr(cls, key, value)
 
 
 with contextlib.suppress(FileNotFoundError):

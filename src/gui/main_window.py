@@ -5,7 +5,7 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from config import CONFIG
 from utils import get_osu_db_cached
-from gui.dpg_windows import InformationWindow, LifeBarGraphWindow, AttributesWindow
+from gui.tools import InformationTab, LifeBarGraphTab, AttributesTab
 
 
 class MainWindow():
@@ -36,9 +36,9 @@ class MainWindow():
                     dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(asksaveasfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path, initialfile="replay")))
 
             with dpg.tab_bar():
-                self.attr_window = AttributesWindow(self.on_update)
-                self.life_window = LifeBarGraphWindow()
-                self.info_window = InformationWindow()
+                self.attr_window = AttributesTab(self.on_update)
+                self.life_window = LifeBarGraphTab()
+                self.info_window = InformationTab()
 
         with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
             dpg.add_text("", tag="error_text")
@@ -46,7 +46,7 @@ class MainWindow():
 
         dpg.set_primary_window("main_window", value=True)
 
-    def on_update(self):
+    def on_update(self, *args, **kwargs):
         self.attr_window.read_in_replay(self.curr_replay)
 
         self.info_window.update(self.osu_db, self.curr_replay)

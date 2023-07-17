@@ -7,7 +7,7 @@ import calculation
 from config import CONFIG
 
 
-class InformationWindow:
+class InformationTab:
     def __init__(self) -> None:
         self._id = self._build()
 
@@ -33,7 +33,8 @@ class InformationWindow:
             beatmap = osu_db.get_beatmap_from_hash(replay.beatmap_hash)
             beatmap_path = str(Path(CONFIG.osu_path) / "songs" / beatmap.folder_name / beatmap.osu_file)
             pp = calculation.calculate_pp(beatmap_path, mode=replay.mode, mods=replay.mods,
-                                          n_geki=replay.count_geki, n_katu=replay.count_katu, n300=replay.count_300, n100=replay.count_100, n50=replay.count_50, n_misses=replay.count_miss, combo=replay.max_combo)
+                                          n_geki=replay.count_geki, n_katu=replay.count_katu, n300=replay.count_300,
+                                          n100=replay.count_100, n50=replay.count_50, n_misses=replay.count_miss, combo=replay.max_combo)
 
         dpg.set_value("total_accuracy", acc)
         dpg.set_value("total_pp", f"{str(pp)}pp")
@@ -43,5 +44,6 @@ class InformationWindow:
         if replay.game_version != 0:
             beatmap = osu_db.get_beatmap_from_hash(replay.beatmap_hash)
             beatmap_name = f"{beatmap.artist} / {beatmap.title}"
+            self.update(osu_db, replay)
 
         dpg.set_value("beatmap_name", beatmap_name)

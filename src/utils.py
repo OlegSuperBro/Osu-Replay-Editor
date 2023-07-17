@@ -1,5 +1,4 @@
 import datetime
-import numpy as np
 from aenum import IntFlag, Enum
 from pathlib import Path
 from os import mkdir
@@ -101,7 +100,7 @@ def get_from_tree(dictionary: dict, *path: any) -> any:
 
 def is_int(value: any):
     try:
-        assert int(value) == float(value)
+        assert float(value).is_integer()
     except (AssertionError, ValueError, TypeError):
         return False
     else:
@@ -110,20 +109,6 @@ def is_int(value: any):
 
 def lifebar2str(lifebar: List[LifeBarState]):
     return ",".join([f"{state.time}|{state.life}" for state in lifebar])[:-1]
-
-
-def dist_point_to_segment(p, s0, s1):
-    """
-    Get the distance from the point *p* to the segment (*s0*, *s1*), where
-    *p*, *s0*, *s1* are ``[x, y]`` arrays.
-    """
-    s01 = s1 - s0
-    s0p = p - s0
-    if (s01 == 0).all():
-        return np.hypot(*s0p)
-    # Project onto segment, without going past segment ends.
-    p1 = s0 + np.clip((s0p @ s01) / (s01 @ s01), 0, 1) * s01
-    return np.hypot(*(p - p1))
 
 
 def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:

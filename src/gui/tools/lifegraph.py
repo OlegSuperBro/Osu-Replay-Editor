@@ -12,7 +12,7 @@ class XYPoint:
     y: int
 
 
-class LifeBarGraphWindow:
+class LifeBarGraphTab:
     def __init__(self) -> None:
         self._id = self._build()
 

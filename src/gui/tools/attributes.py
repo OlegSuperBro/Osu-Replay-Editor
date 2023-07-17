@@ -4,7 +4,6 @@ from math import ceil
 from osrparse import Replay
 
 import utils
-from utils import Mod
 
 
 def generate_mods_checkboxes(width, callback):
@@ -30,7 +29,7 @@ def generate_mods_checkboxes(width, callback):
                     dpg.add_checkbox(label=mod, tag=f"mod_{mod}", callback=callback)
 
 
-class AttributesWindow:
+class AttributesTab:
     def __init__(self, callback) -> None:
         self._id = self._build(callback)
 
@@ -59,7 +58,7 @@ class AttributesWindow:
                     dpg.add_input_int(max_value=65535, max_clamped=True, tag="gekis", callback=callback)
                     dpg.add_input_int(max_value=65535, max_clamped=True, tag="katus", callback=callback)
                     dpg.add_input_int(max_value=65535, max_clamped=True, tag="misses", callback=callback)
-                    dpg.add_input_int(max_value=2147483647, max_clamped=True, tag="total_score", callback=callback)
+                    dpg.add_input_text(tag="total_score", callback=lambda x, y, z: [self.verify_score(), callback(x, y, z)])  # stupid int overflow bug :(
                     dpg.add_input_int(max_value=65535, max_clamped=True, tag="max_combo", callback=callback)
                     dpg.add_checkbox(tag="perfect_combo", callback=callback)
                     with dpg.tree_node(label="Date picker"):
@@ -85,7 +84,20 @@ class AttributesWindow:
         dpg.set_value("time", {"hour": replay.timestamp.hour, "min": replay.timestamp.minute, "sec": replay.timestamp.second})
 
         for mod in utils.mods_list():
-            dpg.set_value(f"mod_{mod}", Mod[mod] in Mod(replay.mods))
+            dpg.set_value(f"mod_{mod}", utils.Mod[mod] in utils.Mod(replay.mods))
+
+    def verify_score(self):
+        value = dpg.get_value("total_score")
+        if not utils.is_int(value):
+            value = 0
+
+        if int(value) >= 2147483647:
+            value = 2147483647
+
+        elif int(value) <= -2147483647:
+            value = -2147483647
+
+        dpg.set_value("total_score", value)
 
     def read_in_replay(self, replay: Replay) -> None:
         replay.username = dpg.get_value("username")
@@ -95,7 +107,7 @@ class AttributesWindow:
         replay.count_geki = dpg.get_value("gekis")
         replay.count_katu = dpg.get_value("katus")
         replay.count_miss = dpg.get_value("misses")
-        replay.score = dpg.get_value("total_score")
+        replay.score = int(dpg.get_value("total_score"))
         replay.max_combo = dpg.get_value("max_combo")
         replay.perfect = dpg.get_value("perfect_combo")
 
@@ -105,9 +117,9 @@ class AttributesWindow:
         replay.timestamp = datetime.datetime.strptime(f'{date.get("year") - 100 + 2000}/{date.get("month")}/{date.get("month_day")} {time.get("hour")}:{time.get("min")}:{time.get("sec")}', "%Y/%m/%d %H:%M:%S")
         replay.mods = self.get_mods()
 
-    def get_mods(self) -> Mod:
-        mods = 0
-        for mod in utils.mods_list():
-            if dpg.get_value(f"mod_{mod}"):
-                mods += Mod[mod].value
-        return Mod(mods)
+    def get_mods(self) -> utils.Mod:
+        return utils.Mod(sum(
+            utils.Mod[mod].value
+            for mod in utils.mods_list()
+            if dpg.get_value(f"mod_{mod}")
+        ))

@@ -31,4 +31,5 @@ if __name__ == "__main__":
     except Exception:
         traceback.print_exc()
         with open("traceback.txt", "w") as f:
+            f.write(datetime.now().strftime("%d/%m/%Y, %H:%M:%S") + "\n")
             f.write(traceback.format_exc())
