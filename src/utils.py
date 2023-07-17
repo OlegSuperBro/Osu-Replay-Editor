@@ -57,9 +57,6 @@ class Mod(IntFlag):
     Mirror = 1 << 30
 
 
-CLI_START_COMMAND = f"py \"{Path(__file__).parent}\\CLI.py\""
-
-
 def mods_list() -> list[str]:
     mod_list = list(map(lambda c: c.name, Mod))
     mod_list.remove("Target")  # it will break replay
@@ -113,64 +110,6 @@ def is_int(value: any):
 
 def lifebar2str(lifebar: List[LifeBarState]):
     return ",".join([f"{state.time}|{state.life}" for state in lifebar])[:-1]
-
-
-def generate_command(input_path: str = None, nickname: str = None, n300: int = None, n100: int = None, n50: int = None, ngekis: int = None, nkatus: int = None, nmisses: int = None,
-                     score: int = None, maxcombo: int = None, pfc: bool = None, mods: str = None, rawmods: int = None, time: int = None, lifebar: str = None, output: str = None) -> str:
-    command = CLI_START_COMMAND
-
-    if input_path is not None:
-        command += f" \"{input_path}\""
-
-    else:
-        command += " \"[path]\""
-
-    if nickname is not None:
-        command += f" --nickname {nickname}"
-
-    if n300 is not None:
-        command += f" --n300 {n300}"
-
-    if n100 is not None:
-        command += f" --n100 {n100}"
-
-    if n50 is not None:
-        command += f" --n50 {n50}"
-
-    if ngekis is not None:
-        command += f" --ngekis {ngekis}"
-
-    if nkatus is not None:
-        command += f" --nkatus {nkatus}"
-
-    if nmisses is not None:
-        command += f" --nmisses {nmisses}"
-
-    if score is not None:
-        command += f" --score {score}"
-
-    if maxcombo is not None:
-        command += f" --maxcombo {maxcombo}"
-
-    if pfc is not None:
-        command += f" --pfc {pfc}"
-
-    if mods is not None:
-        command += f" --mods {mods}"
-
-    if rawmods is not None:
-        command += f" --rawmods {rawmods}"
-
-    if time is not None:
-        command += f" --time {time}"
-
-    if lifebar is not None:
-        command += f" --lifebar \"{lifebar}\""
-
-    if output is not None:
-        command += f" -o \"{output}\""
-
-    return command
 
 
 def dist_point_to_segment(p, s0, s1):

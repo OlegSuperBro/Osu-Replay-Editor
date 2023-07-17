@@ -8,7 +8,7 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from config import CONFIG
 from utils import get_osu_db_cached
-from gui.dpg_windows import InformationWindow, CliCommandWindow, LifeBarGraphWindow, AttributesWindow
+from gui.dpg_windows import InformationWindow, LifeBarGraphWindow, AttributesWindow
 
 
 class MainWindow():
@@ -53,7 +53,6 @@ class MainWindow():
                     dpg.add_menu_item(label="Life graph editor", callback=self.build_life)
                     # dpg.add_menu_item(label="Data editor")
                     dpg.add_menu_item(label="Replay information", callback=self.build_info)
-                    dpg.add_menu_item(label="CLI command", callback=self.build_CLI)
 
         with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
             dpg.add_text("", tag="error_text")
@@ -61,7 +60,6 @@ class MainWindow():
 
         self.build_attr()
         self.build_life()
-        self.build_CLI()
         self.build_info()
 
     def build_attr(self):
@@ -80,14 +78,6 @@ class MainWindow():
 
         self.life_window = LifeBarGraphWindow()
 
-    def build_CLI(self):
-        if dpg.does_item_exist("CLI_window"):
-            dpg.show_item(self.cli_window._id)
-            dpg.focus_item("CLI_command")
-            return
-
-        self.cli_window = CliCommandWindow()
-
     def build_info(self):
         if dpg.does_item_exist("info_window"):
             dpg.show_item(self.info_window._id)
@@ -100,7 +90,6 @@ class MainWindow():
         self.attr_window.read_in_replay(self.curr_replay)
 
         self.info_window.update(self.osu_db, self.curr_replay)
-        self.cli_window.update(self.curr_replay)
 
     def save_replay(self, path=None):
         if self.curr_replay.game_version == 0:
@@ -138,7 +127,6 @@ class MainWindow():
         self.load_from_replay()
 
         self.info_window.update_on_load(self.osu_db, self.curr_replay)
-        self.cli_window.update_on_load(self.curr_replay)
 
         dpg.set_viewport_title(f"{self.default_title} {self.replay_path}")
 
