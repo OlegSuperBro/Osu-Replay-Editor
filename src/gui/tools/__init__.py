@@ -1,5 +1,4 @@
-from .attributes import AttributesTab
-from .lifegraph import LifeBarGraphTab
-from .information import InformationTab
+from .attributes.attributes import AttributesTab
+from .lifegraph.lifegraph import LifeBarGraphTab
 
-__all__ = ["AttributesTab", "LifeBarGraphTab", "InformationTab"]
+tabs = [AttributesTab, LifeBarGraphTab]

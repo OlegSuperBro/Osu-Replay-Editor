@@ -4,7 +4,7 @@ import traceback
 from osrparse import Replay, GameMode, Mod
 from datetime import datetime
 
-from gui import MainWindow
+from gui.main_window import MainWindow
 
 DEFAULT_REPLAY = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
 if __name__ == "__main__":

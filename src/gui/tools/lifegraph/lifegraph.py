@@ -5,6 +5,8 @@ from typing import List
 from dataclasses import dataclass
 import utils
 
+from gui.template import Template
+
 
 @dataclass
 class XYPoint:
@@ -12,8 +14,8 @@ class XYPoint:
     y: int
 
 
-class LifeBarGraphTab:
-    def __init__(self) -> None:
+class LifeBarGraphTab(Template):
+    def __init__(self, update_func) -> None:
         self._id = self._build()
 
         self.lifebar_graph_list: List[XYPoint] = []
@@ -84,7 +86,7 @@ class LifeBarGraphTab:
         self.update_point_list(index, x, y)
         self.update_line_plot()
 
-    def load_from_replay(self, replay: Replay):
+    def read_from_replay(self, replay: Replay):
         lifebar = utils.decrease_lifebar_length(replay.life_bar_graph)
         for _ in range(len(self.lifebar_graph_list) - 1):
             self.delete_last_point_graph()
@@ -109,7 +111,7 @@ class LifeBarGraphTab:
         self.delete_last_point_graph()
 
     def delete_last_point_graph(self):
-        dpg.delete_item(f"point_{len(self.lifebar_graph_list)}")  # why tf this works?
+        dpg.delete_item(f"point_{len(self.lifebar_graph_list)}")
 
     def update_all_points(self):
         for index in range(len(self.lifebar_graph_list)):

@@ -2,10 +2,12 @@ import dearpygui.dearpygui as dpg
 from pathlib import Path
 from osrparse import Replay
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from typing import List
 
 from config import CONFIG
 from utils import get_osu_db_cached
-from gui.tools import InformationTab, LifeBarGraphTab, AttributesTab
+from gui.tools import tabs
+from .template import Template
 
 
 class MainWindow():
@@ -16,6 +18,8 @@ class MainWindow():
 
         self.replay = replay
         self.replay_path = replay_path
+
+        self.tabs: List[Template]
 
         dpg.create_viewport(title=self.default_title, width=1500, height=900)
 
@@ -36,9 +40,7 @@ class MainWindow():
                     dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(asksaveasfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path, initialfile="replay")))
 
             with dpg.tab_bar():
-                self.attr_window = AttributesTab(self.on_update)
-                self.life_window = LifeBarGraphTab()
-                self.info_window = InformationTab()
+                self.tabs = [tab(self.on_update) for tab in tabs]
 
         with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
             dpg.add_text("", tag="error_text")
@@ -47,9 +49,11 @@ class MainWindow():
         dpg.set_primary_window("main_window", value=True)
 
     def on_update(self, *args, **kwargs):
-        self.attr_window.read_in_replay(self.curr_replay)
+        for tab in self.tabs:
+            tab.read_in_replay(self.curr_replay)
 
-        self.info_window.update(self.osu_db, self.curr_replay)
+        for tab in self.tabs:
+            tab.update(self.osu_db, self.curr_replay)
 
     def save_replay(self, path=None):
         if self.curr_replay.game_version == 0:
@@ -61,8 +65,8 @@ class MainWindow():
             self.show_error("Please, select a file")
             return
 
-        self.attr_window.read_in_replay(self.curr_replay)
-        self.life_window.read_in_replay(self.curr_replay)
+        for tab in self.tabs:
+            tab.read_in_replay(self.curr_replay)
 
         self.curr_replay.write_path(path)
 
@@ -84,12 +88,11 @@ class MainWindow():
             return
         self.replay_path = path
         self.curr_replay = replay
-        self.load_from_replay()
 
-        self.info_window.update_on_load(self.osu_db, self.curr_replay)
+        for tab in self.tabs:
+            tab.read_from_replay(self.curr_replay)
+
+        for tab in self.tabs:
+            tab.on_replay_load(self.osu_db, self.curr_replay)
 
         dpg.set_viewport_title(f"{self.default_title} {self.replay_path}")
-
-    def load_from_replay(self):
-        self.attr_window.load_from_replay(self.curr_replay)
-        self.life_window.load_from_replay(self.curr_replay)

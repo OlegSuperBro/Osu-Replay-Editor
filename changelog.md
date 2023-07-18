@@ -9,6 +9,7 @@
 
 ### Changed
 - Saving replay will change working replay path to saved
+- Interface was been rewrited
 
 ### Fixed
 - Opening corrupted replay "crashes" program

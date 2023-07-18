@@ -10,7 +10,7 @@ def calculate_acc(count_300: int = 0, count_100: int = 0, count_50: int = 0, cou
 
 
 def replay_calculate_acc(replay: Replay):
-    return calculate_acc(replay.count_300, replay.count_100, replay.count_50,  replay.count_miss)
+    return calculate_acc(replay.count_300, replay.count_100, replay.count_50, replay.count_miss)
 
 
 def calculate_pp(beatmap_path: str, mode: GameMode = 0, mods: Mod = Mod(0),
