@@ -82,7 +82,7 @@ class LifeBarGraphTab(Template):
         self.update_all_points()
         self.update_line_plot()
 
-    def point_callback(self, caller, app_info=None, user_info=None):
+    def point_callback(self, caller, app_info=None, user_info=None, *args, **kwargs):
         index = int(dpg.get_item_alias(caller).split("_")[1])
         x, y, _, _ = dpg.get_value(caller)
 
@@ -97,7 +97,7 @@ class LifeBarGraphTab(Template):
         self.update_point_list(index, x, y)
         self.update_line_plot()
 
-    def toggle_save_mode(self, caller=None, app_info=None, user_info=None):
+    def toggle_save_mode(self, caller=None, app_info=None, user_info=None, *args, **kwargs):
         dpg.configure_item("save_mode_group", show=dpg.get_value("save_mode_toggle"))
         dpg.configure_item("unsave_mode_group", show=not dpg.get_value("save_mode_toggle"))
         dpg.configure_item("unsave_group", show=not dpg.get_value("save_mode_toggle"))
