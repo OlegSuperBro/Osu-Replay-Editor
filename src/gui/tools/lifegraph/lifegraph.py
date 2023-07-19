@@ -112,7 +112,7 @@ class LifeBarGraphTab(Template):
     def read_from_replay(self, replay: Replay):
         lifebar = utils.decrease_lifebar_length(replay.life_bar_graph)
         for _ in range(len(self.lifebar_graph_list) - 1):
-            self.delete_last_point_graph()
+            self.delete_point(0)
         self.lifebar_graph_list.clear()
 
         for index, x, y in zip(range(len(lifebar)), [life_state.time for life_state in lifebar], [int(life_state.life * 100) for life_state in lifebar]):
