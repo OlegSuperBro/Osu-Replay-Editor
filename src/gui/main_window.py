@@ -10,7 +10,7 @@ from gui.tools import tabs
 from .template import Template
 
 
-class MainWindow():
+class MainWindow:
     default_title = "Replay Editor"
 
     def __init__(self, replay: Replay, replay_path: str) -> None:
@@ -42,7 +42,7 @@ class MainWindow():
             with dpg.tab_bar():
                 self.tabs = [tab(self.on_update) for tab in tabs]
 
-        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=400, height=150):
+        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=500, height=300):
             dpg.add_text("", tag="error_text")
             dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item("error_popup", show=False))
 

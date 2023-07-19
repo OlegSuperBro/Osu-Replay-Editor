@@ -1,5 +1,15 @@
 # Changelog
 
+# 2023.7.20.1
+Hotfix
+
+### Changed
+- Better error popup
+
+### Fixed
+- Error because no assets (i forgot about them D: )
+- Error on launch without replay
+
 # 2023.7.20.0
 
 ### Added

@@ -9,11 +9,15 @@ from gui.main_window import MainWindow
 DEFAULT_REPLAY = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
 if __name__ == "__main__":
     error = None
+    replay = None
+    replay_path = None
     try:
         replay = Replay.from_path(sys.argv[1] if len(sys.argv) > 1 else None)
         replay_path = sys.argv[1] if len(sys.argv) > 1 else None
-    except Exception as e:
-        error = f"Error occured while trying to load replay: \n\n{e} \n\nPossibly, replay is corrupted or path is incorrect"
+    except TypeError:
+        pass
+    except Exception:
+        error = f"Error occured while trying to load replay: \n\n{traceback.format_exc()} \n\nPossibly, replay is corrupted or path is incorrect"
         replay = DEFAULT_REPLAY
         replay_path = None
 

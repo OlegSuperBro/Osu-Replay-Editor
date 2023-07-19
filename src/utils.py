@@ -7,6 +7,8 @@ from osrparse.utils import LifeBarState
 from typing import List
 from pyosutools.db.osu import Osudb, parse_osudb
 
+from config import CONSTANTS
+
 
 class GameMode(Enum):
     """
@@ -125,7 +127,7 @@ def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:
 
 
 def get_osu_db_cached(db_path) -> Osudb:
-    cache_path = Path(dirname(__file__)) / "cache" / "beatmaps_cache.db"
+    cache_path = f"{CONSTANTS.cache_dir}/beatmaps_cache.db"
     if not isdir(dirname(cache_path)):
         mkdir(dirname(cache_path))
     return parse_osudb(db_path, cache_path, exists(cache_path), sql_check_same_thread=False)
