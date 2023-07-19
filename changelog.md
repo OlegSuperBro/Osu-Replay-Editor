@@ -1,15 +1,17 @@
 # Changelog
 
-# WIP
+# 2023.7.20.0
 
 ### Added
 - Title now have path to current replay
 - Caching for loading osu.db file
 - Deleting points
+- Lifebar now have preview
 
 ### Changed
 - Saving replay will change working replay path to saved
 - Interface was been rewrited
+- Lifebar was reworked
 
 ### Fixed
 - Opening corrupted replay "crashes" program
