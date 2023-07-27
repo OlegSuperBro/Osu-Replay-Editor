@@ -16,10 +16,11 @@ class XYPoint:
 
 
 class LifeBarGraphTab(Template):
-    preview_offset_x = -410
+    preview_offset_x = -370
     preview_offset_y = -20
-    squish = 100
-    # 415x175. Full screen is 4 times wider and 6 time taller
+    preview_width = 1920
+    lifebar_width = 415
+    # 415x175
 
     def __init__(self, update_func) -> None:
         self._id = self._build()
@@ -30,7 +31,7 @@ class LifeBarGraphTab(Template):
         self.last_point_moved = -1
         self.point_moved = None
 
-    def _build(self) -> None:
+    def _build(self) -> int:
         with dpg.texture_registry():
             img = dpg.load_image(f"{CONSTANTS.assets_dir}/song_result_screen.jpg")
             dpg.add_dynamic_texture(img[0], img[1], img[3], tag="preview_result_screen")
@@ -46,17 +47,24 @@ class LifeBarGraphTab(Template):
                 with dpg.group(horizontal=True, tag="save_mode_group"):
                     pass
                 with dpg.group(horizontal=True, show=False, tag="unsave_mode_group"):
-                    dpg.add_checkbox(label="Show Preview", callback=lambda x: dpg.configure_item("preview_lifebar", show=dpg.get_value(x)))
+                    dpg.add_checkbox(label="Show Preview", callback=lambda x: [dpg.configure_item("preview_lifebar", show=dpg.get_value(x)), self.update_view(dpg.get_value(x))], tag="show_preview")
+                    dpg.add_spacer(width=15)
+                    dpg.add_button(label="Fit", callback=lambda: [self.update_view(), self.update_preview()])
+                    dpg.add_checkbox(label="Auto fit", tag="auto_fit")
 
-            with dpg.plot(width=-1, height=-1, tag="life_graph", context_menu_button=-1, no_title=True):
+            with dpg.plot(width=-1, height=-1, tag="life_graph", context_menu_button=-1, box_select_button=-1, no_title=True):
                 dpg.add_plot_axis(dpg.mvXAxis, label="", tag="x_axis", no_tick_labels=True, no_tick_marks=True)
                 dpg.add_plot_axis(dpg.mvYAxis, label="", tag="y_axis", no_tick_labels=True, no_tick_marks=True)
 
                 with dpg.draw_layer(tag="unsave_group", show=False):
                     dpg.add_image_series("preview_result_screen", (0, self.preview_offset_y), (0, 600 + self.preview_offset_y), parent="x_axis", tag="preview_lifebar", show=False)
                     dpg.draw_rectangle(pmin=(0, 0), pmax=(0, 100), color=(255, 0, 0, 255), thickness=20, tag="save_zone_square")
+                    dpg.draw_rectangle(pmin=(0, self.preview_offset_y), pmax=(0, 600 + self.preview_offset_y), color=(255, 153, 0, 255), thickness=20, tag="full_zone_square")
 
                 dpg.add_line_series([], [], parent="y_axis", tag="life_graph_line")
+
+                dpg.set_axis_limits("x_axis", 0, 100)
+                dpg.set_axis_limits("y_axis", 0, 100)
 
             dpg.bind_item_handler_registry("life_graph", "add_point_click_handler")
 
@@ -97,17 +105,54 @@ class LifeBarGraphTab(Template):
         self.update_point_list(index, x, y)
         self.update_line_plot()
 
+        self.update_preview()
+        if dpg.get_value("auto_fit"):
+            self.update_view()
+
     def toggle_save_mode(self, caller=None, app_info=None, user_info=None, *args, **kwargs):
-        dpg.configure_item("save_mode_group", show=dpg.get_value("save_mode_toggle"))
-        dpg.configure_item("unsave_mode_group", show=not dpg.get_value("save_mode_toggle"))
-        dpg.configure_item("unsave_group", show=not dpg.get_value("save_mode_toggle"))
+        save_mode = dpg.get_value("save_mode_toggle")
+        dpg.configure_item("save_mode_group", show=save_mode)
+        dpg.configure_item("unsave_mode_group", show=not save_mode)
+        dpg.configure_item("unsave_group", show=not save_mode)
+        dpg.set_value("show_preview", False)
+        dpg.get_item_callback("show_preview")("show_preview")
+
+    def update_view(self, fit: bool = True):
+        if dpg.get_value("save_mode_toggle"):
+            dpg.set_axis_limits("x_axis", self.lifebar_graph_list[0].x, self.lifebar_graph_list[-1:][0].x)
+            dpg.set_axis_limits("y_axis", 0, 100)
+        else:
+            if fit:
+                dpg.fit_axis_data("x_axis")
+                dpg.fit_axis_data("y_axis")
+
+            dpg.set_axis_limits_auto("x_axis")
+            dpg.set_axis_limits_auto("y_axis")
 
     def update_preview(self):
-        dpg.configure_item("save_zone_square", pmin=(0, 0), pmax=(self.lifebar_graph_list[-1:][0].x, 100))
+        dpg.configure_item("save_zone_square", pmin=(self.lifebar_graph_list[0].x, 0), pmax=(self.lifebar_graph_list[-1:][0].x, 100))
+
+        one_pixel = (self.lifebar_graph_list[-1:][0].x - self.lifebar_graph_list[0].x) / self.lifebar_width
+
+        start_point = self.lifebar_graph_list[0].x / one_pixel
+        end_point = self.lifebar_graph_list[-1:][0].x / one_pixel
+
+        bound_min = (
+            (one_pixel * (start_point + self.preview_offset_x)),
+            self.preview_offset_y
+            )
+
+        bound_max = (
+            (one_pixel * (end_point + self.preview_width - self.lifebar_width + self.preview_offset_x)),
+            600 + self.preview_offset_y)
+
+        dpg.configure_item("full_zone_square",
+                           pmin=bound_min,
+                           pmax=bound_max)
 
         dpg.configure_item("preview_lifebar",
-                           bounds_min=((self.lifebar_graph_list[-1:][0].x / 415 * (self.preview_offset_x + self.squish / 2)), self.preview_offset_y),
-                           bounds_max=((self.lifebar_graph_list[-1:][0].x / 415 * (1980 + self.preview_offset_x - self.squish / 2)), 600 + self.preview_offset_y))
+                           bounds_min=bound_min,
+                           bounds_max=bound_max)
 
     def read_from_replay(self, replay: Replay):
         lifebar = utils.decrease_lifebar_length(replay.life_bar_graph)
@@ -121,6 +166,7 @@ class LifeBarGraphTab(Template):
 
         self.update_line_plot()
         self.update_preview()
+        self.update_view()
 
     def update_point_list(self, index: int, x: int, y: int):
         self.lifebar_graph_list[index].x, self.lifebar_graph_list[index].y = x, y

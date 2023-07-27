@@ -1,5 +1,15 @@
 # Changelog
 
+# WIP
+
+### Added
+- Dynamic preview changing
+
+### Changed
+
+### Fixed
+- Removed selecting area with rmb
+
 # 2023.7.20.1
 Hotfix
 
