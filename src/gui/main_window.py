@@ -6,8 +6,8 @@ from typing import List
 
 from config import CONFIG
 from utils import get_osu_db_cached
-from gui.tools import tabs
-from .template import Template
+from gui.tools import TABS
+from .template import TabTemplate
 
 
 class MainWindow:
@@ -19,7 +19,7 @@ class MainWindow:
         self.replay = replay
         self.replay_path = replay_path
 
-        self.tabs: List[Template]
+        self.tabs: List[TabTemplate]
 
         dpg.create_viewport(title=self.default_title, width=1500, height=900)
 
@@ -40,7 +40,7 @@ class MainWindow:
                     dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(asksaveasfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path, initialfile="replay")))
 
             with dpg.tab_bar():
-                self.tabs = [tab(self.on_update) for tab in tabs]
+                self.tabs = [tab(self.on_update) for tab in TABS]
 
         with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=500, height=300):
             dpg.add_text("", tag="error_text")
