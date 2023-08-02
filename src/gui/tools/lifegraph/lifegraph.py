@@ -5,7 +5,7 @@ from typing import List
 from dataclasses import dataclass
 import utils
 
-from gui.template import Template
+from gui.template import TabTemplate
 from config import CONSTANTS
 
 
@@ -15,7 +15,7 @@ class XYPoint:
     y: int
 
 
-class LifeBarGraphTab(Template):
+class LifeBarGraphTab(TabTemplate):
     preview_offset_x = -370
     preview_offset_y = -20
     preview_width = 1920

@@ -6,7 +6,7 @@ from pathlib import Path
 from pyosutools.db.osu import Osudb
 
 import utils
-from gui.template import Template
+from gui.template import TabTemplate
 import calculation
 from config import CONFIG
 
@@ -34,7 +34,7 @@ def generate_mods_checkboxes(width, callback):
                     dpg.add_checkbox(label=mod, tag=f"mod_{mod}", callback=callback)
 
 
-class AttributesTab(Template):
+class AttributesTab(TabTemplate):
     def __init__(self, update_func) -> None:
         self._id = self._build(update_func)
 

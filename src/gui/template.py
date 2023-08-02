@@ -4,7 +4,7 @@ from pyosutools.db.osu import Osudb
 from typing import Callable
 
 
-class Template:
+class TabTemplate:
     def __init__(self, update_func: Callable) -> None:
         ...
 

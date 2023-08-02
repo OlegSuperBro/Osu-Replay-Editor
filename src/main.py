@@ -28,6 +28,7 @@ if __name__ == "__main__":
             win.show_error(error)
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
+            win.on_update()
         dpg.destroy_context()
 
     except KeyboardInterrupt:
