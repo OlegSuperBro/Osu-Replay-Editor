@@ -24,6 +24,7 @@ class CONSTANTS:
     cache_dir = f"{program_path}\\cache"
 
     skins_dir = f"{assets_dir}\\Skins"
+    default_skin_path = f"{assets_dir}\\Skins\\Default"
 
     config_file = f"{program_path}\\config.yaml"
     dpg_config_file = f"{program_path}\\dearpygui.ini"

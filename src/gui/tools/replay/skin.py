@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dearpygui import dearpygui as dpg
 from os.path import isdir, exists
+from pathlib import Path
 
 from typing import List, Tuple, Union
 
@@ -32,6 +33,7 @@ class Skin:
     slider_start_circle_overlay: str
     slider_end_circle: str
     slider_end_circle_overlay: str
+    reverse_arrow: str
 
     hit_miss: str
     hit_50: str
@@ -43,87 +45,60 @@ class Skin:
     hitcircle: str
     hitcircle_overlay: str
 
-    reverse_arrow: str
 
     @staticmethod
-    def load_skin(name: str, prefer2x: bool = True) -> Skin:
+    def load_skin(name: str, fallback_skin: str = None, prefer2x: bool = True) -> Skin:
         if not isdir(f"{CONSTANTS.skins_dir}\\{name}"):
             raise FileNotFoundError(f"Skin {name} don't exists in 'skins' directory")
+
+        def load_with_fallback(image_name):
+            if exists(skin_path / image_name):
+                _, tag = load_image(skin_path, image_name, prefer2x)
+            else:
+                _, tag = load_image(fallback_skin_path, image_name, prefer2x)
+            return tag
+
         tmp_skin = Skin()
 
-        skin_path = f"{CONSTANTS.skins_dir}\\{name}"
+        skin_path = Path(f"{CONSTANTS.skins_dir}\\{name}")
+
+        fallback_skin_path = CONSTANTS.default_skin_path
+        if fallback_skin is not None:
+            fallback_skin_path = f"{CONSTANTS.skins_dir}\\{fallback_skin}"
 
         tmp_skin.name = name
 
         default_numbers = []
         with dpg.texture_registry():
             for i in range(10):
-                _, tag = load_image(skin_path, f"default-{i}", prefer2x)
-                default_numbers.append(tag)
+                default_numbers.append(load_with_fallback(f"default-{i}"))
             tmp_skin.default_numbers = default_numbers
 
-            _, tag = load_image(skin_path, "cursor", prefer2x)
-            tmp_skin.cursor = tag
+            tmp_skin.cursor = load_with_fallback("cursor")
+            tmp_skin.cursor_middle = load_with_fallback("cursormiddle")
+            tmp_skin.cursor_smoke = load_with_fallback("cursor-smoke")
+            tmp_skin.cursor_trail = load_with_fallback("cursortrail")
 
-            _, tag = load_image(skin_path, "cursormiddle", prefer2x)
-            tmp_skin.cursor_middle = tag
+            tmp_skin.follow_point = load_with_fallback("followpoint")
 
-            _, tag = load_image(skin_path, "cursor-smoke", prefer2x)
-            tmp_skin.cursor_smoke = tag
+            tmp_skin.slider_ball = load_with_fallback("sliderb0")
+            tmp_skin.slider_follow_circle = load_with_fallback("sliderfollowcircle")
+            tmp_skin.slider_score_point = load_with_fallback("sliderscorepoint")
+            tmp_skin.slider_start_circle = load_with_fallback("sliderstartcircle")
+            tmp_skin.slider_start_circle_overlay = load_with_fallback("sliderstartcircleoverlay")
+            tmp_skin.slider_end_circle = load_with_fallback("sliderendcircle")
+            tmp_skin.slider_end_circle_overlay = load_with_fallback("sliderendcircleoverlay")
+            tmp_skin.reverse_arrow = load_with_fallback("reversearrow")
 
-            _, tag = load_image(skin_path, "cursortrail", prefer2x)
-            tmp_skin.cursor_trail = tag
+            tmp_skin.hit_miss = load_with_fallback("hit0")
+            tmp_skin.hit_50 = load_with_fallback("hit50")
+            tmp_skin.hit_100 = load_with_fallback("hit100")
+            tmp_skin.hit_katu = load_with_fallback("hit100k")
+            tmp_skin.hit_300 = load_with_fallback("hit300")
+            tmp_skin.hit_geki = load_with_fallback("hit300g")
 
-            _, tag = load_image(skin_path, "followpoint", prefer2x)
-            tmp_skin.follow_point = tag
-
-            _, tag = load_image(skin_path, "sliderb0", prefer2x)
-            tmp_skin.slider_ball = tag
-
-            _, tag = load_image(skin_path, "sliderfollowcircle", prefer2x)
-            tmp_skin.slider_follow_circle = tag
-
-            _, tag = load_image(skin_path, "sliderscorepoint", prefer2x)
-            tmp_skin.slider_score_point = tag
-
-            # _, tag = load_image(skin_path, "slider_start_circle", prefer2x)
-            # tmp_skin.slider_start_circle = tag
-
-            # _, tag = load_image(skin_path, "slider_start_circle_overlay", prefer2x)
-            # tmp_skin.slider_start_circle_overlay = tag
-
-            # _, tag = load_image(skin_path, "slider_end_circle", prefer2x)
-            # tmp_skin.slider_end_circle = tag
-
-            # _, tag = load_image(skin_path, "slider_end_circle_overlay", prefer2x)
-            # tmp_skin.slider_end_circle_overlay = tag
-
-            _, tag = load_image(skin_path, "hit0", prefer2x)
-            tmp_skin.hit_miss = tag
-
-            _, tag = load_image(skin_path, "hit50", prefer2x)
-            tmp_skin.hit_50 = tag
-
-            _, tag = load_image(skin_path, "hit100", prefer2x)
-            tmp_skin.hit_100 = tag
-
-            _, tag = load_image(skin_path, "hit100k", prefer2x)
-            tmp_skin.hit_katu = tag
-
-            _, tag = load_image(skin_path, "hit300", prefer2x)
-            tmp_skin.hit_300 = tag
-
-            _, tag = load_image(skin_path, "hit300g", prefer2x)
-            tmp_skin.hit_geki = tag
-
-            _, tag = load_image(skin_path, "hitcircle", prefer2x)
-            tmp_skin.hitcircle = tag
-
-            _, tag = load_image(skin_path, "hitcircleoverlay", prefer2x)
-            tmp_skin.hitcircle_overlay = tag
-
-            _, tag = load_image(skin_path, "reversearrow", prefer2x)
-            tmp_skin.reverse_arrow = tag
+            tmp_skin.hitcircle = load_with_fallback("hitcircle")
+            tmp_skin.hitcircle_overlay = load_with_fallback("hitcircleoverlay")
 
         return tmp_skin
 
@@ -141,5 +116,8 @@ def load_image(skin_path, name, prefer2x: bool = True) -> Union[Tuple[str, Tuple
         img = dpg.load_image(f"{skin_path}\\{name}.png")
 
     tag = f"{name}_texture"
-    dpg.add_static_texture(img[0], img[1], img[3], tag=tag)
+    try:
+        dpg.add_static_texture(img[0], img[1], img[3], tag=tag)
+    except TypeError:
+        raise FileNotFoundError(f"File {name} not found in {skin_path} skin")
     return img, tag
