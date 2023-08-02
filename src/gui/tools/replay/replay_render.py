@@ -31,16 +31,23 @@ class ReplayRender:
         self.drawer = _Drawer(skin, parent)
 
     def render_frame(self, replay_data: List[ReplayEventOsu], timestamp: int):
-        closest_event_timestamp = -1
-        closest_event_index = None
-        for index in range(len(replay_data)):
-            event = replay_data[index]
-            to_timestamp = abs(timestamp - event.time_delta)
-            if to_timestamp < closest_event_timestamp or closest_event_timestamp == -1:
-                closest_event_index = index
-                closest_event_timestamp = to_timestamp
+        closest_event_index = self.get_closest_event_index(replay_data, timestamp)
 
-        prev_event = replay_data[closest_event_index - 1]
-        event = replay_data[closest_event_index]
-        x, y = event.x, event.y
+        prev_event: ReplayEventOsu = replay_data[closest_event_index - 1]
+        event: ReplayEventOsu = replay_data[closest_event_index]
+
+        time_delta = event.time_delta - prev_event.time_delta
+        timestamp_delta = timestamp - prev_event.time_delta
+        time_passed_percent = timestamp_delta / time_delta if timestamp_delta != 0 else 1
+
+        x_delta = event.x - prev_event.x
+        y_delta = event.y - prev_event.y
+
+        x = prev_event.x + x_delta * time_passed_percent
+        y = prev_event.y + y_delta * time_passed_percent
         self.drawer.draw_cursor(x, y, self.DEFAULT_OFFSET)
+
+    def get_closest_event_index(self, replay_data: List[ReplayEventOsu], timestamp: int):
+        for index, event in enumerate(replay_data):
+            if timestamp <= event.time_delta:
+                return index
