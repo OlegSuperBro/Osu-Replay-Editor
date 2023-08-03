@@ -155,7 +155,11 @@ class LifeBarGraphTab(TabTemplate):
                            bounds_max=bound_max)
 
     def read_from_replay(self, replay: Replay):
+        if replay.life_bar_graph is None:
+            replay.life_bar_graph = [LifeBarState(0, 1), LifeBarState(1, 1)]
+
         lifebar = utils.decrease_lifebar_length(replay.life_bar_graph)
+
         for _ in range(len(self.lifebar_graph_list) - 1):
             self.delete_point(0)
         self.lifebar_graph_list.clear()
