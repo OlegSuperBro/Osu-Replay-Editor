@@ -1,5 +1,5 @@
 from osrparse import Replay
-from pyosutools.db.osu import Osudb
+from pyosutools.database import Osudb
 
 from typing import Callable
 

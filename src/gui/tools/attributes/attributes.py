@@ -3,12 +3,14 @@ import datetime
 from math import ceil
 from osrparse import Replay
 from pathlib import Path
-from pyosutools.db.osu import Osudb
+from pyosutools.database import Osudb
 
 import utils
 from gui.template import TabTemplate
 import calculation
 from config import CONFIG
+
+from .utils import get_beatmap_by_hash
 
 
 def generate_mods_checkboxes(width, callback):
@@ -153,7 +155,7 @@ class AttributesTab(TabTemplate):
         pp = 0
 
         if replay.game_version != 0:
-            beatmap = osu_db.get_beatmap_from_hash(replay.beatmap_hash)
+            beatmap = get_beatmap_by_hash(osu_db.beatmaps, replay.beatmap_hash)
             beatmap_path = str(Path(CONFIG.osu_path) / "songs" / beatmap.folder_name / beatmap.osu_file)
             pp = calculation.calculate_pp(beatmap_path, mode=replay.mode, mods=replay.mods,
                                           n_geki=replay.count_geki, n_katu=replay.count_katu, n300=replay.count_300,
@@ -165,7 +167,7 @@ class AttributesTab(TabTemplate):
     def on_replay_load(self, osu_db: Osudb, replay: Replay = None):
         beatmap_name = "None"
         if replay.game_version != 0:
-            beatmap = osu_db.get_beatmap_from_hash(replay.beatmap_hash)
+            beatmap = get_beatmap_by_hash(osu_db.beatmaps, replay.beatmap_hash)
             beatmap_name = f"{beatmap.artist} / {beatmap.title}"
             self.update(osu_db, replay)
 

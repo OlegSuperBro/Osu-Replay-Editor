@@ -1,6 +1,6 @@
 osrparse == 7.0.0
 dearpygui == 1.9.1 
-pyosutools == 0.2.3
+pyosutools == 0.2.5
 rosu-pp-py == 0.9.4
 pyyaml >= 6.0
 pyperclip >= 1.8.2

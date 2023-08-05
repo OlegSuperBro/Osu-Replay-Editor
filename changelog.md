@@ -6,6 +6,7 @@
 - Dynamic preview changing
 
 ### Changed
+- Updated pyosutools to 0.2.5
 
 ### Fixed
 - Removed selecting area with rmb
