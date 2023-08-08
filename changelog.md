@@ -1,6 +1,6 @@
 # Changelog
 
-# WIP
+# 2023.8.9.0
 
 ### Added
 - Dynamic preview changing
