@@ -192,6 +192,11 @@ def on_build(parent: var_types.TabBar, update_func: var_types.UpdateFunc):
 @plugin_utils.on_replay_load()
 def on_load(db: var_types.Osudb, replay: var_types.Replay):
     tab.on_replay_load(replay)
+
+
+@plugin_utils.on_replay_load(plugin_utils.Priority.DEFAULT + 1)
+def on_post_load(db: var_types.Osudb, replay: var_types.Replay):
+    tab.on_replay_post_load(db, replay)
     tab.update_data(db, replay)
 
 

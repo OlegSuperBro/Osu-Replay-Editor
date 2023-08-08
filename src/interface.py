@@ -60,7 +60,7 @@ class MainWindow:
         app_globals.replay_path = path
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
 
-    def on_data_update(self):
+    def on_data_update(self, *args):  # why caller passed only on build :(  i hate this
         run_funcs(app_globals.plugin_funcs.on_data_update)
 
     def show_error(self, error_text):
