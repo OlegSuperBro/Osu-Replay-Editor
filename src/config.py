@@ -26,6 +26,7 @@ class CONSTANTS:
 
         assets_dir = f"{program_path}\\assets"
         cache_dir = f"{program_path}\\cache"
+        plugin_dir = f"{program_path}\\plugins"
 
         config_file = f"{program_path}\\config.yaml"
 

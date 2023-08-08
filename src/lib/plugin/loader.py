@@ -1,16 +1,16 @@
 import importlib
 import pkgutil
 
-import plugins
+from config import CONSTANTS
 
 
-def iter_namespace(ns_pkg):
-    return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
+def iter_namespace(path):
+    return pkgutil.iter_modules(path, "plugins" + ".")
 
 
 def get_plugins():
     return {
         name: importlib.import_module(name)
         for finder, name, ispkg
-        in iter_namespace(plugins)
+        in iter_namespace([CONSTANTS.PATHS.plugin_dir])
     }
