@@ -3,14 +3,21 @@ import datetime
 from math import ceil
 from osrparse import Replay
 from pathlib import Path
+from pyosutools.datatypes import BeatmapDB
 from pyosutools.database import Osudb
+from typing import List
 
-import utils
-from gui.template import TabTemplate
-import calculation
+import lib.utils as utils
+import lib.calculation as calculation
+from lib.plugin import utils as plugin_utils, var_types
 from config import CONFIG
 
-from .utils import get_beatmap_by_hash
+
+def get_beatmap_by_hash(beatmaps: List[BeatmapDB], beatmap_hash: str) -> BeatmapDB:
+    return next(
+        (beatmap for beatmap in beatmaps if beatmap_hash == beatmap.md5_hash),
+        None,
+    )
 
 
 def generate_mods_checkboxes(width, callback):
@@ -36,64 +43,61 @@ def generate_mods_checkboxes(width, callback):
                     dpg.add_checkbox(label=mod, tag=f"mod_{mod}", callback=callback)
 
 
-class AttributesTab(TabTemplate):
-    def __init__(self, update_func) -> None:
-        self._id = self._build(update_func)
+class Tab:
+    def __init__(self) -> None:
+        self._id = None
 
-    def _build(self, callback) -> None:
-        with dpg.tab(label="Attributes", tag="attr_window") as _id:
+    def build(self, callback) -> None:
+        with dpg.group(horizontal=True):
             with dpg.group(horizontal=True):
-                with dpg.group(horizontal=True):
-                    with dpg.group():
-                        dpg.add_text("Player")
-                        dpg.add_spacer(height=67)
-                        dpg.add_text("300s")
-                        dpg.add_text("100s")
-                        dpg.add_text("50s")
-                        dpg.add_text("Gekis")
-                        dpg.add_text("Katus")
-                        dpg.add_text("Misses")
-                        dpg.add_text("Total score")
-                        dpg.add_text("Max combo")
-                        dpg.add_text("Perfect combo")
-                        dpg.add_spacer(height=5)
-                        dpg.add_text("Date and time")
-                        dpg.add_spacer(height=160)
-                        dpg.add_text("Mods")
-                    with dpg.group(width=600):
-                        dpg.add_input_text(multiline=True, height=90, tab_input=True, tag="username", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="300s", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="100s", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="50s", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="gekis", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="katus", callback=callback)
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="misses", callback=callback)
-                        dpg.add_input_text(tag="total_score", callback=lambda x, y, z: [self.verify_score(), callback(x, y, z)])  # stupid int overflow bug :(
-                        dpg.add_input_int(max_value=65535, max_clamped=True, tag="max_combo", callback=callback)
-                        dpg.add_checkbox(tag="perfect_combo", callback=callback)
+                with dpg.group():
+                    dpg.add_text("Player")
+                    dpg.add_spacer(height=67)
+                    dpg.add_text("300s")
+                    dpg.add_text("100s")
+                    dpg.add_text("50s")
+                    dpg.add_text("Gekis")
+                    dpg.add_text("Katus")
+                    dpg.add_text("Misses")
+                    dpg.add_text("Total score")
+                    dpg.add_text("Max combo")
+                    dpg.add_text("Perfect combo")
+                    dpg.add_spacer(height=5)
+                    dpg.add_text("Date and time")
+                    dpg.add_spacer(height=160)
+                    dpg.add_text("Mods")
+                with dpg.group(width=600):
+                    dpg.add_input_text(multiline=True, height=90, tab_input=True, tag="username", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="300s", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="100s", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="50s", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="gekis", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="katus", callback=callback)
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="misses", callback=callback)
+                    dpg.add_input_text(tag="total_score", callback=lambda: [self.verify_score(), callback()])  # stupid int overflow :(
+                    dpg.add_input_int(max_value=65535, max_clamped=True, tag="max_combo", callback=callback)
+                    dpg.add_checkbox(tag="perfect_combo", callback=callback)
 
-                        dpg.add_spacer(height=5)
-                        dpg.add_date_picker(default_value={"month_day": datetime.date.today().day, "year": datetime.date.today().year-2000 + 100, "month": datetime.date.today().month}, tag="date", callback=callback)  # Date
+                    dpg.add_spacer(height=5)
+                    dpg.add_date_picker(default_value={"month_day": datetime.date.today().day, "year": datetime.date.today().year-2000 + 100, "month": datetime.date.today().month}, tag="date", callback=callback)  # Date
 
-                        dpg.add_time_picker(tag="time", callback=callback)
+                    dpg.add_time_picker(tag="time", callback=callback)
 
-                        dpg.add_spacer(height=5)
-                        with dpg.child_window(label="Mods", width=550, height=175, no_scrollbar=True, menubar=True):
-                            with dpg.menu_bar():
-                                dpg.add_text("Mods")
-                            generate_mods_checkboxes(5, callback)
+                    dpg.add_spacer(height=5)
+                    with dpg.child_window(label="Mods", width=550, height=175, no_scrollbar=True, menubar=True):
+                        with dpg.menu_bar():
+                            dpg.add_text("Mods")
+                        generate_mods_checkboxes(5, callback)
 
-                with dpg.group(horizontal=True):
-                    with dpg.group():
-                        dpg.add_text("Beatmap name")
-                        dpg.add_text("Total accuracy")
-                        dpg.add_text("Total pp")
-                    with dpg.group():
-                        dpg.add_text(tag="beatmap_name")
-                        dpg.add_text(tag="total_accuracy")
-                        dpg.add_text(tag="total_pp")
-
-            return _id
+            with dpg.group(horizontal=True):
+                with dpg.group():
+                    dpg.add_text("Beatmap name")
+                    dpg.add_text("Total accuracy")
+                    dpg.add_text("Total pp")
+                with dpg.group():
+                    dpg.add_text(tag="beatmap_name")
+                    dpg.add_text(tag="total_accuracy")
+                    dpg.add_text(tag="total_pp")
 
     def verify_score(self):
         value = dpg.get_value("total_score")
@@ -115,7 +119,7 @@ class AttributesTab(TabTemplate):
             if dpg.get_value(f"mod_{mod}")
         ))
 
-    def read_from_replay(self, replay: Replay):
+    def on_replay_load(self, replay: Replay):
         dpg.set_value("username", replay.username)
         dpg.set_value("300s", replay.count_300)
         dpg.set_value("100s", replay.count_100)
@@ -132,7 +136,7 @@ class AttributesTab(TabTemplate):
         for mod in utils.mods_list():
             dpg.set_value(f"mod_{mod}", utils.Mod[mod] in utils.Mod(replay.mods))
 
-    def read_in_replay(self, replay: Replay) -> None:
+    def on_replay_save(self, replay: Replay) -> None:
         replay.username = dpg.get_value("username")
         replay.count_300 = dpg.get_value("300s")
         replay.count_100 = dpg.get_value("100s")
@@ -164,7 +168,7 @@ class AttributesTab(TabTemplate):
         dpg.set_value("total_accuracy", acc)
         dpg.set_value("total_pp", f"{str(pp)}pp")
 
-    def on_replay_load(self, osu_db: Osudb, replay: Replay = None):
+    def on_replay_post_load(self, osu_db: Osudb, replay: Replay = None):
         beatmap_name = "None"
         if replay.game_version != 0:
             beatmap = get_beatmap_by_hash(osu_db.beatmaps, replay.beatmap_hash)
@@ -172,3 +176,26 @@ class AttributesTab(TabTemplate):
             self.update(osu_db, replay)
 
         dpg.set_value("beatmap_name", beatmap_name)
+
+
+@plugin_utils.on_start()
+def on_start():
+    global tab
+    tab = Tab()
+
+
+@plugin_utils.on_window_build()
+def on_build(parent: var_types.TabBar, update_func: var_types.UpdateFunc):
+    with dpg.tab(label="Attributes", tag="attr_window", parent=parent) as _id:
+        tab._id = _id
+        tab.build(update_func)
+
+
+@plugin_utils.on_replay_load()
+def on_load(replay: var_types.Replay):
+    tab.on_replay_load(replay)
+
+
+@plugin_utils.on_replay_save()
+def on_save(replay: var_types.Replay):
+    tab.on_replay_save(replay)

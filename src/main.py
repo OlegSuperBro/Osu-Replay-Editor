@@ -1,31 +1,33 @@
 import dearpygui.dearpygui as dpg
 import sys
 import traceback
-from osrparse import Replay, GameMode, Mod
+from osrparse import Replay
 from datetime import datetime
 
-from gui.main_window import MainWindow
+from interface import MainWindow
+from app_globals import app_globals, init_globals
+from lib.plugin.runner import run_funcs
 
-DEFAULT_REPLAY = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
 if __name__ == "__main__":
-    error = None
-    replay = None
-    replay_path = None
-    try:
-        replay = Replay.from_path(sys.argv[1] if len(sys.argv) > 1 else None)
-        replay_path = sys.argv[1] if len(sys.argv) > 1 else None
-    except TypeError:
-        pass
-    except Exception:
-        error = f"Error occured while trying to load replay: \n\n{traceback.format_exc()} \n\nPossibly, replay is corrupted or path is incorrect"
-        replay = DEFAULT_REPLAY
-        replay_path = None
+    init_globals()
+
+    run_funcs(app_globals.plugin_funcs.on_start)
 
     try:
         dpg.create_context()
-        win = MainWindow(replay, replay_path)
-        if error:
-            win.show_error(error)
+        win = MainWindow()
+
+        try:
+            if len(sys.argv) > 1:
+                app_globals.replay = Replay.from_path(sys.argv[1])
+                app_globals.replay_path = sys.argv[1]
+                run_funcs(app_globals.plugin_funcs.on_replay_load)
+
+        except TypeError:
+            pass
+        except Exception:
+            win.show_error(f"Error occured while trying to load replay: \n\n{traceback.format_exc()} \n\nPossibly, replay is corrupted or path is incorrect")
+
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
         dpg.destroy_context()

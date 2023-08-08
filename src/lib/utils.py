@@ -3,7 +3,7 @@ from aenum import IntFlag, Enum
 from os import mkdir, PathLike
 from os.path import dirname, exists, isdir
 from osrparse.utils import LifeBarState
-from typing import List
+from typing import List, Any
 from pyosutools.database import Osudb
 
 from config import CONSTANTS
@@ -99,9 +99,9 @@ def get_from_tree(dictionary: dict, *path: any) -> any:
     return value
 
 
-def is_int(value: any):
+def is_int(value: Any):
     try:
-        assert float(value).is_integer()
+        assert float(value).is_integer() and value.find("e") == -1
     except (AssertionError, ValueError, TypeError):
         return False
     else:
@@ -112,21 +112,8 @@ def lifebar2str(lifebar: List[LifeBarState]):
     return ",".join([f"{state.time}|{state.life}" for state in lifebar])[:-1]
 
 
-def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:
-    new_lifebar = []
-    for index in range(len(lifebar)):
-        if index == 0 or index >= len(lifebar) - 1:
-            new_lifebar.append(lifebar[index])
-            continue
-
-        if lifebar[index].life != lifebar[index + 1].life or lifebar[index].life != lifebar[index - 1].life:
-            new_lifebar.append(lifebar[index])
-
-    return new_lifebar
-
-
 def get_osu_db_cached(db_path: PathLike) -> Osudb:
-    cache_path = f"{CONSTANTS.cache_dir}/beatmaps_cache.pickle"
+    cache_path = f"{CONSTANTS.PATHS.cache_dir}/beatmaps_cache.pickle"
     if not isdir(dirname(cache_path)):
         mkdir(dirname(cache_path))
 
@@ -139,7 +126,7 @@ def get_osu_db_cached(db_path: PathLike) -> Osudb:
 
 
 def save_osu_db_cache(osudb: Osudb) -> None:
-    cache_path = f"{CONSTANTS.cache_dir}/beatmaps_cache.pickle"
+    cache_path = f"{CONSTANTS.PATHS.cache_dir}/beatmaps_cache.pickle"
     if not isdir(dirname(cache_path)):
         mkdir(dirname(cache_path))
     osudb.save_cache_beatmaps(cache_path)

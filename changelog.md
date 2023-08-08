@@ -4,12 +4,16 @@
 
 ### Added
 - Dynamic preview changing
+- App globals saved in different file
 
 ### Changed
 - Updated pyosutools to 0.2.5
+- Better plugins
+- More renaming
 
 ### Fixed
 - Removed selecting area with rmb
+- Typing "\*e\*" in "total score" field now don't break
 
 # 2023.7.20.1
 Hotfix
