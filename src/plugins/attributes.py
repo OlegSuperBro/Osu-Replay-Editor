@@ -136,7 +136,7 @@ class Tab:
         for mod in utils.mods_list():
             dpg.set_value(f"mod_{mod}", utils.Mod[mod] in utils.Mod(replay.mods))
 
-    def on_replay_save(self, replay: Replay) -> None:
+    def load_in_replay(self, replay: Replay) -> None:
         replay.username = dpg.get_value("username")
         replay.count_300 = dpg.get_value("300s")
         replay.count_100 = dpg.get_value("100s")
@@ -154,17 +154,15 @@ class Tab:
         replay.timestamp = datetime.datetime.strptime(f'{date.get("year") - 100 + 2000}/{date.get("month")}/{date.get("month_day")} {time.get("hour")}:{time.get("min")}:{time.get("sec")}', "%Y/%m/%d %H:%M:%S")
         replay.mods = self.get_mods()
 
-    def update(self, osu_db: Osudb, replay: Replay = None):
+    def update_data(self, osu_db: Osudb, replay: Replay = None):
         acc = calculation.calculate_acc(replay.count_300, replay.count_100, replay.count_50, replay.count_miss)
         pp = 0
-
         if replay.game_version != 0:
             beatmap = get_beatmap_by_hash(osu_db.beatmaps, replay.beatmap_hash)
             beatmap_path = str(Path(CONFIG.osu_path) / "songs" / beatmap.folder_name / beatmap.osu_file)
             pp = calculation.calculate_pp(beatmap_path, mode=replay.mode, mods=replay.mods,
                                           n_geki=replay.count_geki, n_katu=replay.count_katu, n300=replay.count_300,
                                           n100=replay.count_100, n50=replay.count_50, n_misses=replay.count_miss, combo=replay.max_combo)
-
         dpg.set_value("total_accuracy", acc)
         dpg.set_value("total_pp", f"{str(pp)}pp")
 
@@ -173,7 +171,7 @@ class Tab:
         if replay.game_version != 0:
             beatmap = get_beatmap_by_hash(osu_db.beatmaps, replay.beatmap_hash)
             beatmap_name = f"{beatmap.artist} / {beatmap.title}"
-            self.update(osu_db, replay)
+            self.update_data(osu_db, replay)
 
         dpg.set_value("beatmap_name", beatmap_name)
 
@@ -192,10 +190,17 @@ def on_build(parent: var_types.TabBar, update_func: var_types.UpdateFunc):
 
 
 @plugin_utils.on_replay_load()
-def on_load(replay: var_types.Replay):
+def on_load(db: var_types.Osudb, replay: var_types.Replay):
     tab.on_replay_load(replay)
+    tab.update_data(db, replay)
 
 
 @plugin_utils.on_replay_save()
 def on_save(replay: var_types.Replay):
-    tab.on_replay_save(replay)
+    tab.load_in_replay(replay)
+
+
+@plugin_utils.on_data_update()
+def on_update(db: var_types.Osudb, replay: var_types.Replay):
+    tab.load_in_replay(replay)
+    tab.update_data(db, replay)
