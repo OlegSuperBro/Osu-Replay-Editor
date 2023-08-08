@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from osrparse import Replay
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+from filedialogs import open_file_dialog, save_file_dialog
 
 from config import CONFIG, CONSTANTS
 from app_globals import app_globals
@@ -33,9 +33,9 @@ class MainWindow:
         with dpg.window(tag=CONSTANTS.TAGS.main_window):
             with dpg.menu_bar(tag=CONSTANTS.TAGS.menu_bar):
                 with dpg.menu(label="File"):
-                    dpg.add_menu_item(label="Open", callback=lambda: self.open_replay(askopenfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path + "\\Replays")))
-                    dpg.add_menu_item(label="Save", callback=lambda: self.save_replay(app_globals.replay_path))
-                    dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(asksaveasfilename(defaultextension=".osr", filetypes=[("Osu! Replay", ".osr"), ("All files", "")], initialdir=CONFIG.osu_path, initialfile="replay")))
+                    dpg.add_menu_item(label="Open", callback=lambda: self.open_replay(open_file_dialog(title="Open...", directory=CONFIG.osu_path + "\\Replays", default_ext=".osr", ext=[("Osu! Replay", ".osr"), ("All files", "")])))
+                    dpg.add_menu_item(label="Save", callback=lambda: self.save_replay(app_globals.replay_path, True))
+                    dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(save_file_dialog(title="Save as...", directory=CONFIG.osu_path, default_name="replay", default_ext=".osr", ext=[("Osu! Replay", ".osr"), ("All files", "")])))
 
             dpg.add_tab_bar(tag=CONSTANTS.TAGS.tab_bar)
 
@@ -43,13 +43,13 @@ class MainWindow:
 
         run_funcs(app_globals.plugin_funcs.on_window_build)
 
-    def save_replay(self, path=None):
+    def save_replay(self, path=None, save_on_replay_path: bool = False):
         if app_globals.replay.game_version == 0:
             self.show_error("Please, open replay before saving")
             return
-        if path is None:
+        if save_on_replay_path:
             path = app_globals.replay_path
-        elif path == "":
+        elif path == "" or path is None:
             self.show_error("Please, select a file")
             return
 
@@ -69,7 +69,7 @@ class MainWindow:
         dpg.configure_item("error_popup", show=True)
 
     def open_replay(self, path):
-        if path == "":
+        if path == "" or path is None:
             return
         try:
             replay = Replay.from_path(path)
