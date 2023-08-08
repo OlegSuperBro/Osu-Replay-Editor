@@ -43,10 +43,12 @@ def load(path=CONSTANTS.PATHS.config_file):
 
 
 def save():
-    yaml.safe_dump({key: CONFIG.__dict__.get(key)
+    yaml.safe_dump({key: getattr(CONFIG, key)
                     for key in list(CONFIG.__annotations__.keys())},
                    open(CONSTANTS.PATHS.config_file, "w"))
 
 
 if exists(CONSTANTS.PATHS.config_file) and not isdir(CONSTANTS.PATHS.config_file):
     load()
+else:
+    CONFIG = Config()

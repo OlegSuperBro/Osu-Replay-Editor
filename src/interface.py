@@ -33,9 +33,9 @@ class MainWindow:
         with dpg.window(tag=CONSTANTS.TAGS.main_window):
             with dpg.menu_bar(tag=CONSTANTS.TAGS.menu_bar):
                 with dpg.menu(label="File"):
-                    dpg.add_menu_item(label="Open", callback=lambda: self.open_replay(open_file_dialog(title="Open...", directory=CONFIG.osu_path + "\\Replays", default_ext=".osr", ext=[("Osu! Replay", ".osr"), ("All files", "")])))
+                    dpg.add_menu_item(label="Open", callback=lambda: self.open_replay(open_file_dialog(title="Open...", directory=CONFIG.osu_path + "\\Replays", default_ext="osr", ext=[("Osu! Replay (*.osr)", "osr"), ("All files (*.*)", "*")])))
                     dpg.add_menu_item(label="Save", callback=lambda: self.save_replay(app_globals.replay_path, True))
-                    dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(save_file_dialog(title="Save as...", directory=CONFIG.osu_path, default_name="replay", default_ext=".osr", ext=[("Osu! Replay", ".osr"), ("All files", "")])))
+                    dpg.add_menu_item(label="Save as...", callback=lambda: self.save_replay(save_file_dialog(title="Save as...", directory=CONFIG.osu_path, default_name="replay", default_ext="osr", ext=[("Osu! Replay (*.osr)", "osr"), ("All files (*.*)", "*")])))
 
             dpg.add_tab_bar(tag=CONSTANTS.TAGS.tab_bar)
 
