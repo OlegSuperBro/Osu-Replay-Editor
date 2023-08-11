@@ -2,13 +2,13 @@ import dearpygui.dearpygui as dpg
 import DearPyGui_DragAndDrop as dpg_dnd
 import sys
 import traceback
-from osrparse import Replay
 from datetime import datetime
 
 from config import save as save_config, CONSTANTS
 
 if "__compiled__" in locals():
     sys.path.append(CONSTANTS.PATHS.program_path + "/lib/site-packages/")
+
 from lib.plugin import runner
 from interface import MainWindow
 from app_globals import app_globals, init_globals
@@ -22,16 +22,9 @@ if __name__ == "__main__":
         dpg_dnd.initialize()
         win = MainWindow()
 
-        try:
-            if len(sys.argv) > 1:
-                app_globals.replay = Replay.from_path(sys.argv[1])
-                app_globals.replay_path = sys.argv[1]
-                runner.run_funcs(app_globals.plugin_funcs.on_replay_load)
-
-        except TypeError:
-            pass
-        except Exception:
-            win.show_error(f"Error occured while trying to load replay: \n\n{traceback.format_exc()} \n\nPossibly, replay is corrupted or path is incorrect")
+        if len(sys.argv) > 1:
+            dpg.render_dearpygui_frame()
+            win.open_replay(sys.argv[1])
 
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
