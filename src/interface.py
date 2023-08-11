@@ -1,4 +1,5 @@
 import dearpygui.dearpygui as dpg
+import DearPyGui_DragAndDrop as dpg_dnd
 from osrparse import Replay
 from filedialogs import open_file_dialog, save_file_dialog
 
@@ -15,6 +16,8 @@ class MainWindow:
 
         app_globals.data_update_func = self.on_data_update
         self.build()
+
+        dpg_dnd.set_drop(lambda x, _: self.show_error("Sorry, but curentlry drag'n'drop don't supported for multiple files") if len(x) != 1 else self.open_replay(x[0]))
 
         dpg.setup_dearpygui()
         dpg.show_viewport()
@@ -68,8 +71,11 @@ class MainWindow:
         dpg.set_item_pos("error_popup", ((dpg.get_viewport_client_width() - dpg.get_item_width("error_popup")) / 2, (dpg.get_viewport_height() - dpg.get_item_height("error_popup")) / 2))
         dpg.configure_item("error_popup", show=True)
 
-    def open_replay(self, path):
-        if path == "" or path is None:
+    def open_replay(self, path: str):
+        if not path or path is None:
+            return
+        if not path.endswith(".osr"):
+            self.show_error("Files with this extension is not supported")
             return
         try:
             replay = Replay.from_path(path)

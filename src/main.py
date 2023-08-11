@@ -1,4 +1,5 @@
 import dearpygui.dearpygui as dpg
+import DearPyGui_DragAndDrop as dpg_dnd
 import sys
 import traceback
 from osrparse import Replay
@@ -18,6 +19,7 @@ if __name__ == "__main__":
         runner.run_funcs(app_globals.plugin_funcs.on_start)
 
         dpg.create_context()
+        dpg_dnd.initialize()
         win = MainWindow()
 
         try:
