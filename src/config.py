@@ -31,6 +31,7 @@ class CONSTANTS:
         config_file = f"{program_path}\\config.yaml"
 
     class TAGS:
+        startup_window = "startup_window"
         main_window = "main_window"
         tab_bar = "tab_bar"
         menu_bar = "menu_bar"

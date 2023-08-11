@@ -4,10 +4,13 @@ import traceback
 from osrparse import Replay
 from datetime import datetime
 
+from config import save as save_config, CONSTANTS
+
+if "__compiled__" in locals():
+    sys.path.append(CONSTANTS.PATHS.program_path + "/lib/site-packages/")
 from lib.plugin import runner
 from interface import MainWindow
 from app_globals import app_globals, init_globals
-from config import save as save_config
 
 if __name__ == "__main__":
     try:

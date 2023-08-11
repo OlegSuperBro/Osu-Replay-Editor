@@ -82,3 +82,34 @@ class MainWindow:
         run_funcs(app_globals.plugin_funcs.on_replay_load)
 
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
+
+
+class StartupWindow:
+    default_title = "Replay Editor"
+
+    def __init__(self) -> None:
+        dpg.create_viewport(title=self.default_title, width=1500, height=900)
+
+        self.build()
+
+        dpg.setup_dearpygui()
+        dpg.show_viewport()
+
+    def build(self):
+        with dpg.window(label="Error", modal=True, show=False, tag="error_popup", no_resize=True, width=500, height=300):
+            dpg.add_text("", tag="error_text")
+            dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item("error_popup", show=False))
+
+        self.build_window()
+
+    def build_window(self):
+
+        with dpg.window(tag=CONSTANTS.TAGS.startup_window):
+            dpg.add_text("pass")
+
+        dpg.set_primary_window(CONSTANTS.TAGS.startup_window, value=True)
+
+    def show_error(self, error_text):
+        dpg.set_value("error_text", error_text)
+        dpg.set_item_pos("error_popup", ((dpg.get_viewport_client_width() - dpg.get_item_width("error_popup")) / 2, (dpg.get_viewport_height() - dpg.get_item_height("error_popup")) / 2))
+        dpg.configure_item("error_popup", show=True)
