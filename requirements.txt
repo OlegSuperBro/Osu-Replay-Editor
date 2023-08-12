@@ -7,3 +7,4 @@ pyperclip >= 1.8.2
 aenum >= 3.1.15
 windows-filedialogs == 0.0.6
 DearPyGui-DragAndDrop==1.0.0
+requests >= 2.31.0

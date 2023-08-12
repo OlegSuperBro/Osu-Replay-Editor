@@ -6,6 +6,8 @@ from typing import List
 
 
 class Config:
+    app_ignore_updates: bool = False
+
     osu_path: str = "C:\\Games\\osu!"
     skin: str = "Default"
 
@@ -21,6 +23,8 @@ class Config:
 
 
 class CONSTANTS:
+    APP_VERSION = "v2023.8.9.0-alpha"
+
     class PATHS:
         program_path = f"{dirname(abspath(sys.argv[0]))}"
 
