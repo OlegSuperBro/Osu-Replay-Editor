@@ -1,4 +1,5 @@
 from aenum import IntEnum
+from typing import List
 
 from app_globals import app_globals
 
@@ -9,49 +10,19 @@ class Priority(IntEnum):
     REPLAY_READING = 100
 
 
-def on_start(priority: int = Priority.DEFAULT):
-    def decorator(func):
-        app_globals.plugin_funcs.on_start.append((func, priority))
-        app_globals.plugin_funcs.on_start.sort(key=lambda x: x[1])
-        return func
+def _create_decorator(funcs_list: List, default_priority: int):
+    def decorator(priority: int = default_priority):
+        def sub_decorator(func):
+            funcs_list.append((func, priority))
+            funcs_list.sort(key=lambda x: x[1])
+            return func
+        return sub_decorator
     return decorator
 
 
-def on_replay_load(priority: int = Priority.REPLAY_READING):
-    def decorator(func):
-        app_globals.plugin_funcs.on_replay_load.append((func, priority))
-        app_globals.plugin_funcs.on_replay_load.sort(key=lambda x: x[1])
-        return func
-    return decorator
-
-
-def on_replay_save(priority: int = Priority.REPLAY_CHANGING):
-    def decorator(func):
-        app_globals.plugin_funcs.on_replay_save.append((func, priority))
-        app_globals.plugin_funcs.on_replay_save.sort(key=lambda x: x[1])
-        return func
-    return decorator
-
-
-def on_data_update(priority: int = Priority.DEFAULT):
-    def decorator(func):
-        app_globals.plugin_funcs.on_data_update.append((func, priority))
-        app_globals.plugin_funcs.on_data_update.sort(key=lambda x: x[1])
-        return func
-    return decorator
-
-
-def on_frame_update(priority: int = Priority.DEFAULT):
-    def decorator(func):
-        app_globals.plugin_funcs.on_frame_update.append((func, priority))
-        app_globals.plugin_funcs.on_frame_update.sort(key=lambda x: x[1])
-        return func
-    return decorator
-
-
-def on_window_build(priority: int = Priority.DEFAULT):
-    def decorator(func):
-        app_globals.plugin_funcs.on_window_build.append((func, priority))
-        app_globals.plugin_funcs.on_window_build.sort(key=lambda x: x[1])
-        return func
-    return decorator
+on_start = _create_decorator(app_globals.plugin_funcs.on_start, Priority.DEFAULT)
+on_replay_load = _create_decorator(app_globals.plugin_funcs.on_replay_load, Priority.REPLAY_READING)
+on_replay_save = _create_decorator(app_globals.plugin_funcs.on_replay_save, Priority.REPLAY_CHANGING)
+on_data_update = _create_decorator(app_globals.plugin_funcs.on_data_update, Priority.DEFAULT)
+on_frame_update = _create_decorator(app_globals.plugin_funcs.on_frame_update, Priority.DEFAULT)
+on_window_build = _create_decorator(app_globals.plugin_funcs.on_window_build, Priority.DEFAULT)
