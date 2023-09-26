@@ -2,13 +2,14 @@ import dearpygui.dearpygui as dpg
 import DearPyGui_DragAndDrop as dpg_dnd
 import asyncio
 import webbrowser
-from osrparse import Replay
 from filedialogs import open_file_dialog, save_file_dialog
 
 from config import CONFIG, CONSTANTS
 from app_globals import app_globals
 from lib.plugin.runner import run_funcs
 from updater import app_check_update
+from replay_controller import open_replay, save_replay
+from lib.errors import CorruptedReplayError, NotSupportedExtentionError, EmptyReplayError, EmptyPathError
 
 
 class MainWindow:
@@ -45,23 +46,16 @@ class MainWindow:
         run_funcs(app_globals.plugin_funcs.on_window_build)
 
     def save_replay(self, path=None, save_on_replay_path: bool = False):
-        if app_globals.replay.game_version == 0:
+        try:
+            save_replay(app_globals.replay_path if save_on_replay_path else path)
+
+        except EmptyReplayError:
             self.show_error("Please, open replay before saving")
-            return
-        if save_on_replay_path:
-            path = app_globals.replay_path
-        elif path == "" or path is None:
+
+        except EmptyPathError:
             self.show_error("Please, select a file")
-            return
 
-        run_funcs(app_globals.plugin_funcs.on_replay_presave)
-
-        app_globals.replay.write_path(path)
-
-        app_globals.replay_path = path
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
-
-        run_funcs(app_globals.plugin_funcs.on_replay_presave)
 
     def on_data_update(self, *args):  # why caller passed only on build :(  i hate this
         run_funcs(app_globals.plugin_funcs.on_data_update)
@@ -72,23 +66,15 @@ class MainWindow:
         dpg.configure_item("error_popup", show=True)
 
     def open_replay(self, path: str):
-        if not path or path is None:
-            return
-        if not path.endswith(".osr"):
+        try:
+            open_replay(path)
+        except NotSupportedExtentionError:
             self.show_error("Files with this extension is not supported")
             return
-        try:
-            replay = Replay.from_path(path)
-        except Exception as e:
-            self.show_error(f"Error occured while trying to load replay: \n\n{e} \n\nPossibly, replay is corrupted")
+
+        except CorruptedReplayError:
+            self.show_error("Error occured while trying to load replay. \nPossibly, replay is corrupted")
             return
-
-        run_funcs(app_globals.plugin_funcs.on_replay_preload)
-
-        app_globals.replay_path = path
-        app_globals.replay = replay
-
-        run_funcs(app_globals.plugin_funcs.on_replay_postload)
 
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
 
