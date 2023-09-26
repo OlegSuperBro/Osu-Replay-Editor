@@ -1,5 +1,8 @@
 # Todo
 
+- Other:
+  - [ ] some sort of security thing?
+
 - Interface:
   - [X] Drag and drop files
   - [ ] Creating replay from nothing
@@ -13,21 +16,22 @@
       - [ ] Enabling/Disabling plugins
 
 - Plugin support:
-  - [ ] Custom display name, description
+  - [X] Custom display name, description
   - [ ] Installing dependencies via pip
   - [ ] Installing requirements for plugins
+  - [ ] Other plugins requirements
 
 - Things for plugins:
   - Utils:
-   <!-- i dunno, put here something -->
+   <!-- i dunno, i'll put here something -->
   - Calculations:
     - [X] Calculate acc
     - [X] Calculate pp
 
 - Plugins:
   - List with replay history:
-    - [ ] Saving replays paths
-    - [ ] Save replays history
+    - [X] Saving replays paths
+    - [X] Save replays history
     - [ ] Save replays through app launches
   - Attributes editor:
     - [X] Add timestamp selector
