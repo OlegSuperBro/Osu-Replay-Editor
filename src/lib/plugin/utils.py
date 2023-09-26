@@ -21,8 +21,10 @@ def _create_decorator(funcs_list: List, default_priority: int):
 
 
 on_start = _create_decorator(app_globals.plugin_funcs.on_start, Priority.DEFAULT)
-on_replay_load = _create_decorator(app_globals.plugin_funcs.on_replay_load, Priority.REPLAY_READING)
-on_replay_save = _create_decorator(app_globals.plugin_funcs.on_replay_save, Priority.REPLAY_CHANGING)
+on_replay_preload = _create_decorator(app_globals.plugin_funcs.on_replay_preload, Priority.REPLAY_READING)
+on_replay_postload = _create_decorator(app_globals.plugin_funcs.on_replay_postload, Priority.REPLAY_READING)
+on_replay_presave = _create_decorator(app_globals.plugin_funcs.on_replay_presave, Priority.REPLAY_CHANGING)
+on_replay_postsave = _create_decorator(app_globals.plugin_funcs.on_replay_postsave, Priority.REPLAY_CHANGING)
 on_data_update = _create_decorator(app_globals.plugin_funcs.on_data_update, Priority.DEFAULT)
 on_frame_update = _create_decorator(app_globals.plugin_funcs.on_frame_update, Priority.DEFAULT)
 on_window_build = _create_decorator(app_globals.plugin_funcs.on_window_build, Priority.DEFAULT)

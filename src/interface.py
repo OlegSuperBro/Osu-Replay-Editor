@@ -54,12 +54,14 @@ class MainWindow:
             self.show_error("Please, select a file")
             return
 
-        run_funcs(app_globals.plugin_funcs.on_replay_save)
+        run_funcs(app_globals.plugin_funcs.on_replay_presave)
 
         app_globals.replay.write_path(path)
 
         app_globals.replay_path = path
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
+
+        run_funcs(app_globals.plugin_funcs.on_replay_presave)
 
     def on_data_update(self, *args):  # why caller passed only on build :(  i hate this
         run_funcs(app_globals.plugin_funcs.on_data_update)
@@ -80,10 +82,13 @@ class MainWindow:
         except Exception as e:
             self.show_error(f"Error occured while trying to load replay: \n\n{e} \n\nPossibly, replay is corrupted")
             return
+
+        run_funcs(app_globals.plugin_funcs.on_replay_preload)
+
         app_globals.replay_path = path
         app_globals.replay = replay
 
-        run_funcs(app_globals.plugin_funcs.on_replay_load)
+        run_funcs(app_globals.plugin_funcs.on_replay_postload)
 
         dpg.set_viewport_title(f"{self.default_title} {app_globals.replay_path}")
 

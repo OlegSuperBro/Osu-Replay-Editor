@@ -210,11 +210,11 @@ def on_build(parent: var_types.TabBar):
         tab.build()
 
 
-@plugin_utils.on_replay_load()
+@plugin_utils.on_replay_postload()
 def on_load(replay: var_types.Replay):
     tab.on_replay_load(replay)
 
 
-@plugin_utils.on_replay_save()
+@plugin_utils.on_replay_presave()
 def on_save(replay: var_types.Replay):
     tab.on_replay_save(replay)

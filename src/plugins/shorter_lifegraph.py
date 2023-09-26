@@ -1,4 +1,4 @@
-from lib.plugin.utils import on_replay_load
+from lib.plugin.utils import on_replay_postload
 from lib.plugin import var_types
 
 from typing import List
@@ -18,6 +18,6 @@ def decrease_lifebar_length(lifebar: List[LifeBarState]) -> List[LifeBarState]:
     return new_lifebar
 
 
-@on_replay_load()
+@on_replay_postload()
 def on_load(replay: var_types.Replay):
     replay.life_bar_graph = decrease_lifebar_length(replay.life_bar_graph)

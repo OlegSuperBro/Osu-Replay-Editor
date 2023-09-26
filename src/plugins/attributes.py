@@ -189,18 +189,18 @@ def on_build(parent: var_types.TabBar, update_func: var_types.UpdateFunc):
         tab.build(update_func)
 
 
-@plugin_utils.on_replay_load()
+@plugin_utils.on_replay_postload()
 def on_load(db: var_types.Osudb, replay: var_types.Replay):
     tab.on_replay_load(replay)
 
 
-@plugin_utils.on_replay_load(plugin_utils.Priority.DEFAULT + 1)
+@plugin_utils.on_replay_postload(plugin_utils.Priority.DEFAULT + 1)
 def on_post_load(db: var_types.Osudb, replay: var_types.Replay):
     tab.on_replay_post_load(db, replay)
     tab.update_data(db, replay)
 
 
-@plugin_utils.on_replay_save()
+@plugin_utils.on_replay_presave()
 def on_save(replay: var_types.Replay):
     tab.load_in_replay(replay)
 

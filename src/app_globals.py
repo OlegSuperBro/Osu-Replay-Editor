@@ -14,8 +14,10 @@ DEFAULT_REPLAY = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, Fals
 
 class PluginFunctions:
     on_start: List[Tuple[Callable, int]] = []
-    on_replay_load: List[Tuple[Callable, int]] = []
-    on_replay_save: List[Tuple[Callable, int]] = []
+    on_replay_preload: List[Tuple[Callable, int]] = []
+    on_replay_postload: List[Tuple[Callable, int]] = []
+    on_replay_presave: List[Tuple[Callable, int]] = []
+    on_replay_postsave: List[Tuple[Callable, int]] = []
     on_data_update: List[Tuple[Callable, int]] = []
     on_frame_update: List[Tuple[Callable, int]] = []
     on_window_build: List[Tuple[Callable, int]] = []
