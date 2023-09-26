@@ -31,8 +31,8 @@ def on_new_replay(replay: var_types.Replay, osudb: var_types.Osudb):
     if ignore_load:
         return
 
-    if replay in replays:
-        replays.remove(replay)
+    if replay.replay_hash in [r.replay_hash for r in replays]:
+        replays.pop([r.replay_hash for r in replays].index(replay.replay_hash))
 
     replays.insert(0, replay)
     update_window(osudb)
