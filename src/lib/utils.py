@@ -1,12 +1,13 @@
 import datetime
 from aenum import IntFlag, Enum
-from os import mkdir, PathLike
-from os.path import dirname, exists, isdir
-from osrparse.utils import LifeBarState
-from typing import List, Any
-from pyosutools.database import Osudb
 
-from config import CONSTANTS
+from osrparse.utils import LifeBarState
+from osrparse import Replay
+from os import PathLike
+from typing import List, Any
+
+from lib.plugin.runner import run_funcs
+from app_globals import app_globals
 
 
 class GameMode(Enum):
@@ -112,21 +113,14 @@ def lifebar2str(lifebar: List[LifeBarState]):
     return ",".join([f"{state.time}|{state.life}" for state in lifebar])[:-1]
 
 
-def get_osu_db_cached(db_path: PathLike) -> Osudb:
-    cache_path = f"{CONSTANTS.PATHS.cache_dir}/beatmaps_cache.pickle"
-    if not isdir(dirname(cache_path)):
-        mkdir(dirname(cache_path))
+def set_current_replay(replay: Replay, replay_path: str | PathLike = None, update: bool = True, force_loaded_update_preload: bool = False, force_loaded_update_postload: bool = True):
+    app_globals.replay = replay
+    app_globals.replay_path = replay_path
 
-    if exists(cache_path):
-        tmp = Osudb.from_path(db_path, skip_beatmaps=True)
-        tmp.load_cache_beatmaps(cache_path)
-        return tmp
+    if force_loaded_update_preload:
+        run_funcs(app_globals.plugin_funcs.on_replay_preload)
+    if force_loaded_update_postload:
+        run_funcs(app_globals.plugin_funcs.on_replay_postload)
 
-    return Osudb.from_path(db_path)
-
-
-def save_osu_db_cache(osudb: Osudb) -> None:
-    cache_path = f"{CONSTANTS.PATHS.cache_dir}/beatmaps_cache.pickle"
-    if not isdir(dirname(cache_path)):
-        mkdir(dirname(cache_path))
-    osudb.save_cache_beatmaps(cache_path)
+    if update:
+        app_globals.data_update_func()

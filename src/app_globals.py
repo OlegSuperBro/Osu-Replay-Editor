@@ -5,9 +5,9 @@ from datetime import datetime
 from os import PathLike
 from typing import List, Callable, Tuple
 
-from lib.utils import get_osu_db_cached
 from lib.plugin.loader import get_plugins
 from config import CONFIG
+from utils import get_osu_db_cached
 
 DEFAULT_REPLAY = Replay(GameMode(0), 0, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, False, Mod(0), [], datetime.now(), [], 0, None)
 
