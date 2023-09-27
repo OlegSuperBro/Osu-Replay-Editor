@@ -209,3 +209,6 @@ def on_save(replay: var_types.Replay):
 def on_update(db: var_types.Osudb, replay: var_types.Replay):
     tab.load_in_replay(replay)
     tab.update_data(db, replay)
+
+
+REQUIREMENTS = ["rosu-pp-py == 0.9.4"]

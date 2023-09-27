@@ -6,10 +6,11 @@ from filedialogs import open_file_dialog, save_file_dialog
 
 from config import CONFIG, CONSTANTS
 from app_globals import app_globals
-from lib.plugin.runner import run_funcs
 from updater import app_check_update
 from replay_controller import open_replay, save_replay
+from lib.plugin.runner import run_funcs
 from lib.errors import CorruptedReplayError, NotSupportedExtentionError, EmptyReplayError, EmptyPathError
+from plugin_updater import install_all_plugins_requirements
 
 
 class MainWindow:
@@ -140,6 +141,15 @@ class StartupWindow:
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
             await asyncio.sleep(0)
+
+    async def plugin_check_for_update(self):
+        pass
+
+    async def plugin_check_for_requirements(self):
+        install_all_plugins_requirements()
+
+    async def plugin_check_for_dependency(self):
+        pass
 
     def show_error(self, error_text):
         dpg.set_value("error_text", error_text)

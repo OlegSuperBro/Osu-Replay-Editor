@@ -18,8 +18,6 @@ from app_globals import app_globals, init_globals
 
 if __name__ == "__main__":
     try:
-        init_globals()
-
         # first we run welcome/startup window
         dpg.create_context()
         dpg.create_viewport()
@@ -36,7 +34,8 @@ if __name__ == "__main__":
 
             tasks = asyncio.wait([loop.create_task(win.app_check_for_update(), name="update"),
                                   loop.create_task(win.app_cycle_update_text()),
-                                  loop.create_task(win.update_frame(), name="render")], return_when=asyncio.FIRST_COMPLETED)
+                                  loop.create_task(win.update_frame(), name="render")],
+                                 return_when=asyncio.FIRST_COMPLETED)
             result, _ = loop.run_until_complete(tasks)
 
             for task in result:
@@ -46,14 +45,28 @@ if __name__ == "__main__":
                 elif task.get_name() == "update":
                     app_update_avalable = task.result()
 
-        if app_update_avalable:
-            win.show_app_update_avalable()
+        if not CONFIG.app_ignore_updates:
+            loop = asyncio.get_event_loop()
+            tasks = asyncio.wait([loop.create_task(win.plugin_check_for_requirements(), name="install_requirements"),
+                                  loop.create_task(win.app_cycle_update_text()),
+                                  loop.create_task(win.update_frame(), name="render")],
+                                 return_when=asyncio.FIRST_COMPLETED)
+            result, _ = loop.run_until_complete(tasks)
+
+            for task in result:
+                if task.get_name() == "render":
+                    sys.exit()
+
+                elif task.get_name() == "install_requirements":
+                    pass
 
         while dpg.is_dearpygui_running() and win.running and (app_update_avalable):
             dpg.render_dearpygui_frame()
 
         if not dpg.is_dearpygui_running():
             sys.exit()
+
+        init_globals()
 
         #  clean up all items before starting main window
         #  this required cuz creating another viewport is pain

@@ -34,6 +34,8 @@ class CONSTANTS:
 
         config_file = f"{program_path}\\config.yaml"
 
+        site_packages_folder = f"{program_path}/lib/site-packages"
+
     class TAGS:
         startup_window = "startup_window"
         main_window = "main_window"

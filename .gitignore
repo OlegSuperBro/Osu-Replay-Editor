@@ -9,3 +9,4 @@ cache/
 *build.bat
 config.yaml
 traceback.txt
+site-packages
