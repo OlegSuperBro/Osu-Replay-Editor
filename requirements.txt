@@ -1,10 +1,10 @@
 osrparse == 7.0.0
-dearpygui == 1.9.1 
+dearpygui == 1.10.0 
 pyosutools == 0.2.5
 rosu-pp-py == 0.9.4
+windows-filedialogs == 0.0.6
+DearPyGui-DragAndDrop == 1.0.0
 pyyaml >= 6.0
 pyperclip >= 1.8.2
 aenum >= 3.1.15
-windows-filedialogs == 0.0.6
-DearPyGui-DragAndDrop==1.0.0
 requests >= 2.31.0
