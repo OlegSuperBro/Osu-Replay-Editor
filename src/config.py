@@ -23,7 +23,7 @@ class Config:
 
 
 class CONSTANTS:
-    APP_VERSION = "v2023.8.9.0-alpha"
+    APP_VERSION = "v2023.9.26.0-alpha"
 
     class PATHS:
         program_path = f"{dirname(abspath(sys.argv[0]))}"
