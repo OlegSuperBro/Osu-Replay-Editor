@@ -1,5 +1,17 @@
 # Changelog
 
+# 2023.9.26.0
+
+### Added
+- Custom data in plugins (name, requirements, version, etc)
+- Now you can use pre- and post- load/save
+- Drag'n'drop for files
+- Update checker on start
+- New plugin: Replays history
+
+### Changed
+- Some refactoring (check commits with "refac" tag)
+
 # 2023.8.9.0
 
 ### Added
